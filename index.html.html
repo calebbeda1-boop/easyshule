@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson Plan System — Easyshule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=EB+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+  :root{
+    --ink:#0E1A2B;
+    --ink-2:#16253A;
+    --paper:#FFFFFF;
+    --amber:#D9A441;
+    --amber-2:#B9832E;
+    --teal:#2F6F63;
+    --rust:#B4552F;
+    --line:#9aa2ad;
+    --text-dark:#171a1f;
+    --text-soft:#555b63;
+    --danger:#c25b4a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--ink);
+    background-image:
+      radial-gradient(circle at 15% 8%, rgba(217,164,65,0.10), transparent 40%),
+      radial-gradient(circle at 90% 90%, rgba(47,111,99,0.14), transparent 45%);
+    font-family:'Inter',sans-serif;
+    color:var(--paper);
+    min-height:100vh;
+    padding:28px 18px 60px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+  .hidden{display:none !important;}
+
+  /* ============ TOPBAR ============ */
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{
+    width:44px;height:44px;border-radius:9px;overflow:hidden;flex-shrink:0;
+    background:linear-gradient(150deg,var(--amber),var(--rust));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(217,164,65,0.25);
+    font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--ink);font-size:18px;
+  }
+  .brand-text h1{font-family:'Space Grotesk',sans-serif;font-size:19px;margin:0;letter-spacing:0.3px;color:var(--paper);}
+  .brand-text p{margin:2px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#9fb3c8;letter-spacing:0.5px;}
+  .teacher-chip{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink);
+    background:var(--amber);padding:8px 14px;border-radius:20px;
+    display:flex;gap:10px;align-items:center;font-weight:600;
+  }
+  .teacher-chip span.dot{width:6px;height:6px;border-radius:50%;background:var(--teal);}
+  .chip-btn{
+    background:none;border:1px solid rgba(255,255,255,0.25);color:#dbe3ec;
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;padding:8px 13px;border-radius:20px;
+    cursor:pointer;letter-spacing:0.3px;
+  }
+  .chip-btn:hover{border-color:var(--amber);color:var(--amber);}
+  .topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+
+  /* ============ CENTERED CARD (auth / setup) ============ */
+  .center-stage{min-height:70vh;display:flex;align-items:center;justify-content:center;padding:20px 0;}
+  .auth-card{
+    width:100%;max-width:420px;background:var(--ink-2);border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px;padding:32px 28px;box-shadow:0 20px 60px rgba(0,0,0,0.4);
+  }
+  .auth-card h2{font-family:'Space Grotesk',sans-serif;font-size:20px;margin:0 0 4px;color:var(--paper);}
+  .auth-card .sub{font-size:12.5px;color:#9fb3c8;margin:0 0 22px;line-height:1.5;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12.5px;font-weight:500;color:#c7d2de;margin-bottom:7px;}
+  .field select, .field input{
+    width:100%;padding:11px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);
+    background:#0B1522;color:var(--paper);font-family:'Inter',sans-serif;font-size:14px;
+    outline:none;transition:border-color .15s;
+  }
+  .field select:focus, .field input:focus{border-color:var(--amber);}
+  .field select{ appearance:none; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23D9A441'><path d='M5 7l5 5 5-5z'/></svg>"); background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;}
+  .hint{font-size:11px;color:#7c8ba0;margin-top:5px;font-family:'IBM Plex Mono',monospace;}
+  .err-msg{
+    background:rgba(180,85,47,0.14);border:1px solid rgba(180,85,47,0.4);color:#f0c9b7;
+    font-size:12.5px;padding:9px 12px;border-radius:8px;margin-bottom:14px;display:none;line-height:1.5;
+  }
+  .err-msg.show{display:block;}
+  .ok-msg{
+    background:rgba(47,111,99,0.15);border:1px solid rgba(47,111,99,0.4);color:#a9d9cf;
+    font-size:12.5px;padding:9px 12px;border-radius:8px;margin-bottom:14px;display:none;line-height:1.5;
+  }
+  .ok-msg.show{display:block;}
+  .go-btn{
+    position:relative;overflow:hidden;
+    width:100%;padding:13px;border:none;border-radius:9px;margin-top:6px;
+    background:linear-gradient(120deg,var(--amber),#c6912f);
+    background-size:200% 200%;
+    color:var(--ink);font-weight:700;font-size:14.5px;cursor:pointer;
+    font-family:'Space Grotesk',sans-serif;letter-spacing:0.3px;
+    transition:transform .12s, box-shadow .12s, background-position .5s ease;
+  }
+  .go-btn:hover{transform:translateY(-1px); box-shadow:0 6px 18px rgba(217,164,65,0.3);}
+  .go-btn:active{transform:translateY(0);}
+  .go-btn.secondary{background:none;border:1px solid rgba(255,255,255,0.18);color:#dbe3ec;box-shadow:none;}
+  .go-btn.secondary:hover{border-color:var(--amber);color:var(--amber);transform:none;box-shadow:none;}
+  .switch-link{text-align:center;margin-top:16px;font-size:12.5px;color:#9fb3c8;}
+  .switch-link a{color:var(--amber);cursor:pointer;text-decoration:none;font-weight:600;}
+  .switch-link a:hover{text-decoration:underline;}
+
+  .go-btn.magic-pop{
+    animation:magicPulse .55s ease;
+    background:linear-gradient(120deg,var(--teal),var(--amber),var(--rust),var(--amber));
+    background-size:300% 300%;
+    box-shadow:0 8px 26px rgba(47,111,99,0.45), 0 0 0 3px rgba(255,255,255,0.15) inset;
+  }
+  @keyframes magicPulse{
+    0%{background-position:0% 50%; transform:scale(1);}
+    35%{background-position:60% 50%; transform:scale(1.035);}
+    70%{background-position:100% 50%; transform:scale(0.99);}
+    100%{background-position:0% 50%; transform:scale(1);}
+  }
+  .sparkle{
+    position:absolute;top:50%;left:50%;width:6px;height:6px;border-radius:50%;
+    background:#fff;pointer-events:none;opacity:0;
+    box-shadow:0 0 6px 2px rgba(255,255,255,0.9);
+    animation:sparkleFly 0.7s ease-out forwards;
+  }
+  @keyframes sparkleFly{
+    0%{opacity:1; transform:translate(-50%,-50%) scale(1) translate(0,0);}
+    100%{opacity:0; transform:translate(-50%,-50%) scale(0.2) translate(var(--dx), var(--dy));}
+  }
+
+  /* ============ SETUP (uploads) ============ */
+  .setup-card{
+    width:100%;max-width:640px;background:var(--ink-2);border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px;padding:32px 32px 30px;box-shadow:0 20px 60px rgba(0,0,0,0.4);
+  }
+  .setup-card h2{font-family:'Space Grotesk',sans-serif;font-size:20px;margin:0 0 4px;}
+  .setup-card .sub{font-size:12.5px;color:#9fb3c8;margin:0 0 24px;line-height:1.6;}
+  .upload-box{
+    border:1.5px dashed rgba(255,255,255,0.18);border-radius:12px;padding:18px 18px;margin-bottom:16px;
+    display:flex;align-items:center;gap:14px;
+  }
+  .upload-box .u-icon{
+    width:42px;height:42px;border-radius:9px;background:rgba(217,164,65,0.14);
+    display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;color:var(--amber);
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .upload-box .u-text{flex:1;min-width:0;}
+  .upload-box .u-text .t1{font-size:13.5px;font-weight:600;color:var(--paper);margin:0 0 2px;}
+  .upload-box .u-text .t2{font-size:11.5px;color:#8ea0b5;margin:0;font-family:'IBM Plex Mono',monospace;word-break:break-all;}
+  .upload-box.done{border-style:solid;border-color:rgba(47,111,99,0.5);background:rgba(47,111,99,0.08);}
+  .upload-box.done .u-icon{background:rgba(47,111,99,0.2);color:var(--teal);}
+  .file-btn{
+    font-family:'IBM Plex Mono',monospace;font-size:11.5px;font-weight:600;
+    background:none;border:1px solid rgba(255,255,255,0.25);color:#dbe3ec;
+    padding:8px 14px;border-radius:7px;cursor:pointer;flex-shrink:0;white-space:nowrap;
+  }
+  .file-btn:hover{border-color:var(--amber);color:var(--amber);}
+  input[type=file]{display:none;}
+  .setup-note{
+    font-size:11.5px;color:#7c8ba0;line-height:1.6;background:rgba(217,164,65,0.08);
+    border:1px solid rgba(217,164,65,0.25);padding:10px 12px;border-radius:8px;margin:6px 0 20px;
+  }
+
+  /* ============ CONSOLE (main app) ============ */
+  .console{display:grid;grid-template-columns:320px 1fr;gap:22px;align-items:start;}
+  @media (max-width:900px){ .console{grid-template-columns:1fr;} }
+
+  .panel{
+    background:var(--ink-2);
+    border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px;
+    padding:22px 20px 24px;
+    position:sticky; top:20px;
+  }
+  .panel-label{
+    font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.5px;
+    color:var(--amber);text-transform:uppercase;margin:0 0 18px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .panel-label::before{content:"";width:14px;height:1px;background:var(--amber);}
+
+  .more-toggle{
+    background:none;border:1px dashed rgba(255,255,255,0.2);color:#9fb3c8;
+    font-family:'IBM Plex Mono',monospace;font-size:11px;width:100%;padding:9px;border-radius:8px;
+    cursor:pointer;margin-bottom:14px;letter-spacing:0.4px;
+  }
+  .more-toggle:hover{border-color:var(--amber);color:var(--amber);}
+  .more-fields{display:none;}
+  .more-fields.open{display:block;}
+  .more-fields .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+  .fallback-box{
+    display:none;margin-top:16px;padding:12px;border-radius:9px;
+    background:rgba(180,85,47,0.12);border:1px solid rgba(180,85,47,0.35);
+  }
+  .fallback-box p{margin:0 0 8px;font-size:12px;color:#f0c9b7;line-height:1.5;}
+
+  .schedule-box{margin-top:14px;padding:10px 12px;border-radius:8px;font-size:11.5px;line-height:1.5;font-family:'IBM Plex Mono',monospace;}
+  .schedule-box.ok{background:rgba(47,111,99,0.15);border:1px solid rgba(47,111,99,0.4);color:#a9d9cf;}
+  .schedule-box.warn{background:rgba(217,164,65,0.12);border:1px solid rgba(217,164,65,0.35);color:#f0d9a7;}
+
+  .paper-area{min-height:400px;}
+  .placeholder{
+    height:100%;min-height:420px;border:1.5px dashed rgba(255,255,255,0.15);
+    border-radius:14px;display:flex;align-items:center;justify-content:center;
+    flex-direction:column;gap:10px;color:#7c8ba0;text-align:center;padding:40px 20px;
+  }
+  .placeholder .icon{font-family:'IBM Plex Mono',monospace;font-size:26px;color:var(--teal);}
+  .placeholder h3{font-family:'Space Grotesk',sans-serif;color:#c7d2de;margin:0;font-size:16px;}
+  .placeholder p{font-size:13px;margin:0;max-width:320px;line-height:1.6;}
+
+  .toolbar{display:none;justify-content:flex-end;gap:10px;margin-bottom:12px;}
+  .toolbar.show{display:flex;}
+  .print-btn{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;
+    background:var(--amber);color:var(--ink);border:none;padding:10px 18px;
+    border-radius:7px;cursor:pointer;letter-spacing:0.4px;
+  }
+  .print-btn:hover{background:var(--amber-2);}
+
+  /* ============ OFFICIAL FORM SHEET ============ */
+  .sheet{
+    background:var(--paper);
+    color:var(--text-dark);
+    border-radius:8px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.35);
+    overflow:hidden;
+    display:none;
+    font-family:'Inter',sans-serif;
+  }
+  .form-header{
+    display:flex;align-items:center;justify-content:center;gap:12px;
+    padding:12px 20px 8px;border-bottom:2px solid var(--ink);
+    text-align:center;
+  }
+  .form-header .mark{
+    width:44px;height:44px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(150deg,var(--amber),var(--rust));
+    display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-family:'Space Grotesk',sans-serif;
+  }
+  .form-header .h-text{font-family:'EB Garamond',serif;}
+  .form-header .h-text .l1{font-size:11px;letter-spacing:1.6px;font-weight:600;color:var(--text-soft);}
+  .form-header .h-text .l2{font-size:18px;font-weight:600;letter-spacing:0.4px;color:var(--ink);}
+  .form-title{
+    text-align:center;padding:5px 0 7px;font-family:'Space Grotesk',sans-serif;
+    font-size:14px;font-weight:700;letter-spacing:2.5px;color:var(--ink);
+    border-bottom:1px solid var(--line);
+  }
+
+  table.introtable{width:100%;border-collapse:collapse;margin:0 0 2px;}
+  table.introtable td{border:1px solid var(--line);padding:5px 8px;font-size:12px;vertical-align:middle;}
+  table.introtable td.lbl{font-weight:700;text-transform:uppercase;letter-spacing:0.3px;color:var(--text-soft);background:#F7F5EE;width:15%;white-space:nowrap;font-size:10.5px;}
+  table.introtable td.val{color:var(--text-dark);width:35%;}
+  .form-grid{padding:12px 22px 2px;}
+
+  .section-label{
+    font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.6px;color:var(--teal);
+    margin:9px 22px 4px;padding-top:6px;border-top:1px solid var(--ink);
+  }
+  .section-body{margin:0 22px 2px;font-size:12px;line-height:1.42;color:var(--text-dark);}
+  .section-body ol, .section-body ul{margin:2px 0;padding-left:18px;}
+  .section-body li{margin-bottom:1px;}
+
+  table.acttable{width:calc(100% - 44px);margin:6px 22px 4px;border-collapse:collapse;font-size:11.3px;}
+  table.acttable th{
+    background:var(--ink);color:var(--paper);font-family:'Space Grotesk',sans-serif;
+    font-size:9.5px;text-transform:uppercase;letter-spacing:0.4px;padding:5px 8px;text-align:left;
+  }
+  table.acttable td{border:1px solid var(--line);padding:5px 8px;vertical-align:top;line-height:1.4;}
+  table.acttable td.stage{font-weight:700;background:#F4F1E8;width:13%;color:var(--ink);font-size:10.5px;}
+  table.acttable td.time{font-weight:600;background:#F4F1E8;text-align:center;color:var(--text-soft);}
+  table.acttable td.ta{width:43%;}
+  table.acttable td.la{width:43%;}
+
+  .form-footer{
+    text-align:center;padding:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;
+    color:#9aa2ad;border-top:1px solid var(--line);
+  }
+
+  @page{ size:A4; margin:8mm 10mm; }
+  @media print{
+    html,body{background:#fff;padding:0;margin:0;}
+    .console{display:block;}
+    .panel, .topbar, .placeholder, .toolbar{display:none !important;}
+    .sheet{display:block !important; box-shadow:none;border-radius:0;}
+    .wrap{max-width:100%;margin:0;padding:0;}
+    .section-label{break-inside:avoid;}
+    table.acttable, table.introtable{break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ TOPBAR (always visible once logged in) ============ -->
+  <div class="topbar hidden" id="topbar">
+    <div class="brand">
+      <div class="brand-mark">ES</div>
+      <div class="brand-text">
+        <h1>Easyshule</h1>
+        <p id="topbarSub">LESSON PLAN GENERATOR</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="teacher-chip"><span class="dot"></span><span id="teacherChipText">—</span></div>
+      <button class="chip-btn" id="changeFilesBtn">Change Files</button>
+      <button class="chip-btn" id="logoutBtn">Log Out</button>
+    </div>
+  </div>
+
+  <!-- ============ AUTH SCREEN ============ -->
+  <div class="center-stage" id="screenAuth">
+    <div class="auth-card">
+      <div id="loginForm">
+        <h2>Welcome — Log In to Your Account</h2>
+        <p class="sub">Use your school email to log in to the Lesson Plan System.</p>
+        <div class="err-msg" id="loginErr"></div>
+        <div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="jina@shule.ac.tz"></div>
+        <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+        <button class="go-btn" onclick="magicClick(event, doLogin)">Log In →</button>
+        <p class="switch-link">Don't have an account? <a onclick="showSignup()">Create a new account</a></p>
+      </div>
+      <div id="signupForm" class="hidden">
+        <h2>Create a New Account</h2>
+        <p class="sub">This account will store your Yearly Plan and Timetable files, which will be used to generate Lesson Plans.</p>
+        <div class="err-msg" id="signupErr"></div>
+        <div class="field"><label>School Name</label><input type="text" id="suSchool" placeholder="mfano: Easyshule Secondary School"></div>
+        <div class="field"><label>Your Name (Teacher)</label><input type="text" id="suName" placeholder="mfano: Mr. Beda"></div>
+        <div class="field"><label>School Email</label><input type="email" id="suEmail" placeholder="jina@shule.ac.tz"></div>
+        <div class="field"><label>Password</label><input type="password" id="suPass" placeholder="at least 6 characters"></div>
+        <div class="field"><label>Confirm Password</label><input type="password" id="suPass2" placeholder="re-enter password"></div>
+        <button class="go-btn" onclick="magicClick(event, doSignup)">Create Account →</button>
+        <p class="switch-link">Already have an account? <a onclick="showLogin()">Log in here</a></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SETUP SCREEN (upload files) ============ -->
+  <div class="center-stage hidden" id="screenSetup">
+    <div class="setup-card">
+      <h2>Upload System Files</h2>
+      <p class="sub">Upload your Yearly Academic Plan / Scheme of Work and your Teaching Timetable, so the system can generate Lesson Plans automatically.</p>
+
+      <div class="upload-box" id="planBox">
+        <div class="u-icon">XLS</div>
+        <div class="u-text">
+          <p class="t1">Yearly Academic Plan / Scheme of Work</p>
+          <p class="t2" id="planFileName">No file yet — Excel with tabs e.g. "ICT-Year 3", "ENT-Year 3"</p>
+        </div>
+        <label class="file-btn">Choose File<input type="file" id="planFileInput" accept=".xlsx,.xls,.csv"></label>
+      </div>
+
+      <div class="upload-box" id="ttBox">
+        <div class="u-icon">TT</div>
+        <div class="u-text">
+          <p class="t1">Teaching Timetable</p>
+          <p class="t2" id="ttFileName">Optional — Excel, CSV, or Word (.docx) with a table: Day, Period, Time, Class, Subject, Duration</p>
+        </div>
+        <label class="file-btn">Choose File<input type="file" id="ttFileInput" accept=".xlsx,.xls,.csv,.docx,.doc"></label>
+      </div>
+
+      <div class="setup-note">
+        Note: your files are processed in your browser, then the extracted data is saved securely to your Easyshule account online — you can log in from any device and your Yearly Plan and Timetable will already be there.
+      </div>
+
+      <div class="err-msg" id="setupErr"></div>
+      <div class="ok-msg" id="setupOk"></div>
+
+      <button class="go-btn" id="continueBtn" onclick="magicClick(event, continueToApp)" disabled>Continue to the System →</button>
+    </div>
+  </div>
+
+  <!-- ============ MAIN APP ============ -->
+  <div class="console hidden" id="screenApp">
+
+    <!-- CONTROL PANEL -->
+    <div class="panel">
+      <p class="panel-label">Enter Details</p>
+
+      <div class="field">
+        <label for="cls">Class</label>
+        <select id="cls">
+          <option value="">— Select class —</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="subj">Subject</label>
+        <select id="subj" disabled>
+          <option value="">— Select a class first —</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="dt">Lesson Date</label>
+        <input type="date" id="dt">
+        <div class="hint">The system will locate the matching week in the Annual Plan</div>
+      </div>
+
+      <div class="field">
+        <label for="students">Number of Students</label>
+        <input type="number" id="students" min="1" placeholder="e.g. 32">
+      </div>
+
+      <button type="button" class="more-toggle" onclick="toggleMore()">+ Stream / Boys / Girls (Time, Period &amp; Duration auto-fill from your timetable)</button>
+      <div class="more-fields" id="moreFields">
+        <div class="row2">
+          <div class="field"><label for="stream">Stream</label><input type="text" id="stream" placeholder="e.g. A"></div>
+          <div class="field"><label for="period">Period</label><input type="text" id="period" placeholder="e.g. 3"></div>
+        </div>
+        <div class="field"><label for="time">Time</label><input type="text" id="time" placeholder="e.g. 11:45 – 12:30"></div>
+        <div class="row2">
+          <div class="field"><label for="boys">Boys</label><input type="number" id="boys" min="0" placeholder="e.g. 18"></div>
+          <div class="field"><label for="girls">Girls</label><input type="number" id="girls" min="0" placeholder="e.g. 14"></div>
+        </div>
+        <div class="field"><label for="duration">Lesson Duration (minutes)</label><input type="number" id="duration" min="10" placeholder="default: 45"></div>
+      </div>
+
+      <button class="go-btn" onclick="magicClick(event, generatePlan)">Generate Lesson Plan →</button>
+
+      <div class="schedule-box" id="scheduleBox" style="display:none;"></div>
+
+      <div class="fallback-box" id="fallbackBox">
+        <p id="fallbackMsg"></p>
+        <select id="fallbackSelect"></select>
+      </div>
+    </div>
+
+    <!-- OUTPUT -->
+    <div class="paper-area">
+      <div class="placeholder" id="placeholder">
+        <div class="icon">&gt;_</div>
+        <h3>No Lesson Plan Yet</h3>
+        <p>Select a subject and class, enter the date and number of students, then click "Generate Lesson Plan" — the system will look up the day/time from your timetable (if uploaded), and fill in the official Lesson Plan form directly from your uploaded Yearly Academic Plan.</p>
+      </div>
+
+      <div class="toolbar" id="toolbar">
+        <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+      </div>
+
+      <div class="sheet" id="sheet">
+
+        <div class="form-header">
+          <div class="mark">ES</div>
+          <div class="h-text">
+            <div class="l1" id="outSchoolLine">THE SCHOOL</div>
+            <div class="l2" id="outSchoolName">Sky Wings Academy</div>
+          </div>
+        </div>
+        <div class="form-title">LESSON PLAN</div>
+
+        <div class="form-grid">
+          <table class="introtable">
+            <tr>
+              <td class="lbl">School</td><td class="val" id="outSchool">—</td>
+              <td class="lbl">Teacher</td><td class="val" id="outTeacher">—</td>
+            </tr>
+            <tr>
+              <td class="lbl">Subject</td><td class="val" id="outSubject">—</td>
+              <td class="lbl">Class / Stream</td><td class="val" id="outClassStream">—</td>
+            </tr>
+            <tr>
+              <td class="lbl">Date</td><td class="val" id="outDate">—</td>
+              <td class="lbl">Day</td><td class="val" id="outDay">—</td>
+            </tr>
+            <tr>
+              <td class="lbl">Time</td><td class="val" id="outTime">—</td>
+              <td class="lbl">Period</td><td class="val" id="outPeriod">—</td>
+            </tr>
+            <tr>
+              <td class="lbl">Lesson Duration</td><td class="val" id="outDuration">—</td>
+              <td class="lbl">Term / Week</td><td class="val" id="outTermWeek">—</td>
+            </tr>
+            <tr>
+              <td class="lbl">Boys / Girls</td><td class="val" id="outBoysGirls">—</td>
+              <td class="lbl">Total</td><td class="val" id="outTotal">—</td>
+            </tr>
+            <tr>
+              <td class="lbl">Topic</td><td class="val" colspan="3" id="outTopic">—</td>
+            </tr>
+            <tr>
+              <td class="lbl">Sub-topic</td><td class="val" colspan="3" id="outSubtopic">—</td>
+            </tr>
+          </table>
+        </div>
+
+        <p class="section-label">Broad Objective</p>
+        <p class="section-body" id="outBroad">—</p>
+
+        <p class="section-label">Specific Objectives &amp; Success Criteria</p>
+        <table class="acttable" id="objTable">
+          <thead><tr><th style="width:45%;">Specific Objective</th><th style="width:55%;">Success Criteria</th></tr></thead>
+          <tbody id="outObjectives"></tbody>
+        </table>
+
+        <p class="section-label">Teaching / Learning Aids</p>
+        <p class="section-body" id="outAids">—</p>
+
+        <p class="section-label">References</p>
+        <p class="section-body" id="outRefs">—</p>
+
+        <p class="section-label">Introduction / Past Knowledge</p>
+        <p class="section-body" id="outIntro">—</p>
+
+        <p class="section-label" style="margin-bottom:0;" id="actLabel">Teaching / Learning Activities (Total: 45 minutes)</p>
+        <table class="acttable">
+          <thead><tr><th style="width:15%;">Stage</th><th style="width:10%;">Time</th><th>Teacher's Activity</th><th>Students' Activity</th></tr></thead>
+          <tbody>
+            <tr><td class="stage">Introduction<br>(Past Knowledge)</td><td class="time" id="timeIntro"></td><td class="ta" id="tIntro"></td><td class="la" id="lIntro"></td></tr>
+            <tr><td class="stage">Main Body</td><td class="time" id="timeMain"></td><td class="ta" id="tMain"></td><td class="la" id="lMain"></td></tr>
+            <tr><td class="stage">Conclusion</td><td class="time" id="timeConcl"></td><td class="ta" id="tConcl"></td><td class="la" id="lConcl"></td></tr>
+          </tbody>
+        </table>
+
+        <p class="section-label">Assessment</p>
+        <div class="section-body"><ul id="outAssessment"></ul></div>
+
+        <p class="section-label">Plenary</p>
+        <p class="section-body" id="outSummary">—</p>
+
+        <div class="form-footer" id="outFooter">Generated automatically from the Yearly Academic Plan</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ======================================================================
+   SUPABASE CONFIG
+   Weka hapa URL na anon key za mradi wako wa Supabase (Project Settings
+   → API). Anon key hii ni salama kuwekwa kwenye front-end — ulinzi halisi
+   wa data unatoka kwenye Row Level Security (RLS) policies za database,
+   siyo kwa kuficha key hii.
+====================================================================== */
+const SUPABASE_URL = 'https://kaxkycnbfpjhlealxhnj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtheGt5Y25iZnBqaGxlYWx4aG5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NjM4ODQsImV4cCI6MjEwMDIzOTg4NH0.aZO_d9uy79QBeZGGVIcFqoO2DjBxCtv6l-14t-11MmQ';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ======================================================================
+   STORAGE / AUTH HELPERS (Supabase-backed — works across any device)
+   Kila kazi inayogusa Supabase imewekwa hapa pekee, ili iwe rahisi
+   kuibadilisha baadaye ikihitajika.
+====================================================================== */
+
+/* --- Data ya mpango wa mwaka / ratiba: jedwali "teacher_data" --- */
+async function loadTeacherData(userId){
+  const { data, error } = await sb
+    .from('teacher_data')
+    .select('plan_data, timetable_data')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if(error){ console.error('loadTeacherData error', error); return null; }
+  return data;
+}
+
+async function saveTeacherData(userId, planData, timetableData){
+  const { error } = await sb
+    .from('teacher_data')
+    .upsert({
+      user_id: userId,
+      plan_data: planData,
+      timetable_data: timetableData,
+      updated_at: new Date().toISOString()
+    });
+  if(error){ console.error('saveTeacherData error', error); throw error; }
+}
+
+/* ======================================================================
+   AUTH
+====================================================================== */
+function showLogin(){
+  document.getElementById('loginForm').classList.remove('hidden');
+  document.getElementById('signupForm').classList.add('hidden');
+}
+function showSignup(){
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('signupForm').classList.remove('hidden');
+}
+
+function showErr(id, msg){
+  const el = document.getElementById(id);
+  el.textContent = msg; el.classList.add('show');
+}
+function hideErr(id){ document.getElementById(id).classList.remove('show'); }
+
+async function doSignup(){
+  hideErr('signupErr');
+  const school = document.getElementById('suSchool').value.trim();
+  const name = document.getElementById('suName').value.trim();
+  const email = document.getElementById('suEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('suPass').value;
+  const pass2 = document.getElementById('suPass2').value;
+
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showErr('signupErr','Please enter a valid email.'); return; }
+  if(pass.length < 6){ showErr('signupErr','Password must be at least 6 characters.'); return; }
+  if(pass !== pass2){ showErr('signupErr','Passwords do not match.'); return; }
+
+  const { data, error } = await sb.auth.signUp({
+    email,
+    password: pass,
+    options: {
+      data: {
+        school_name: school || 'Shule Yangu',
+        teacher_name: name || email.split('@')[0]
+      }
+    }
+  });
+
+  if(error){ showErr('signupErr', error.message); return; }
+
+  if(!data.session){
+    showErr('signupErr','Account created — please check your email to confirm it, then log in.');
+    showLogin();
+    return;
+  }
+
+  enterAppForUser(data.session.user);
+}
+
+async function doLogin(){
+  hideErr('loginErr');
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('loginPass').value;
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if(error){ showErr('loginErr', error.message === 'Invalid login credentials' ? 'Email au password si sahihi.' : error.message); return; }
+
+  enterAppForUser(data.session.user);
+}
+
+async function doLogout(){
+  await sb.auth.signOut();
+  document.getElementById('topbar').classList.add('hidden');
+  document.getElementById('screenApp').classList.add('hidden');
+  document.getElementById('screenSetup').classList.add('hidden');
+  document.getElementById('screenAuth').classList.remove('hidden');
+  showLogin();
+  document.getElementById('loginEmail').value='';
+  document.getElementById('loginPass').value='';
+}
+
+/* ======================================================================
+   ENTERING THE APP AFTER LOGIN — decide setup vs main app
+====================================================================== */
+let CURRENT_USER_ID = '';
+let CURRENT_EMAIL = '';
+let CURRENT_PROFILE = null;
+let DATA = {};      // DATA[subject] = [{years:[...], rows:[...]}, ...]
+let TIMETABLE = [];  // [{day, period, time, cls, subject, duration}, ...]
+
+async function enterAppForUser(user){
+  CURRENT_USER_ID = user.id;
+  CURRENT_EMAIL = user.email;
+  const meta = user.user_metadata || {};
+  CURRENT_PROFILE = {
+    school: meta.school_name || 'Shule Yangu',
+    name: meta.teacher_name || (user.email ? user.email.split('@')[0] : 'Mwalimu')
+  };
+
+  document.getElementById('screenAuth').classList.add('hidden');
+  document.getElementById('topbar').classList.remove('hidden');
+  document.getElementById('teacherChipText').textContent = CURRENT_PROFILE.name + ' — ' + CURRENT_PROFILE.school;
+  document.getElementById('outSchoolLine').textContent = CURRENT_PROFILE.school.toUpperCase();
+  document.getElementById('outSchoolName').textContent = CURRENT_PROFILE.school;
+  document.getElementById('outSchool').textContent = CURRENT_PROFILE.school;
+  document.getElementById('outTeacher').textContent = CURRENT_PROFILE.name;
+  document.getElementById('outFooter').textContent = 'Generated automatically from the Yearly Academic Plan · ' + CURRENT_PROFILE.school;
+
+  let saved = null;
+  try{
+    saved = await loadTeacherData(user.id);
+  }catch(e){ /* network/db error — fall through to setup */ }
+
+  if(saved && saved.plan_data && Object.keys(saved.plan_data).length){
+    DATA = saved.plan_data;
+    TIMETABLE = saved.timetable_data || [];
+    goToApp();
+    return;
+  }
+  goToSetup();
+}
+
+function goToSetup(){
+  document.getElementById('screenApp').classList.add('hidden');
+  document.getElementById('screenSetup').classList.remove('hidden');
+}
+function goToApp(){
+  document.getElementById('screenSetup').classList.add('hidden');
+  document.getElementById('screenApp').classList.remove('hidden');
+  populateClassDropdown();
+}
+
+document.getElementById('changeFilesBtn').addEventListener('click', goToSetup);
+document.getElementById('logoutBtn').addEventListener('click', doLogout);
+
+/* Auto-login if a session already exists (e.g. page refresh) */
+(async function autoResume(){
+  const { data } = await sb.auth.getSession();
+  if(data && data.session && data.session.user){
+    enterAppForUser(data.session.user);
+  }
+})();
+
+/* ======================================================================
+   FILE PARSING — Yearly Plan (one tab per subject+class) & Timetable
+====================================================================== */
+function normHeader(h){ return String(h||'').toLowerCase().replace(/[^a-z]/g,''); }
+
+const PLAN_HEADER_MAP = {
+  term: ['term'],
+  week: ['week'],
+  topic: ['topic'],
+  objectives: ['objective'],
+  activities: ['activit'],
+  success: ['success'],
+  assessment: ['assessment']
+};
+const TT_HEADER_MAP = {
+  day: ['day'],
+  period: ['period'],
+  time: ['time'],
+  cls: ['class'],
+  subject: ['subject'],
+  duration: ['duration']
+};
+function matchKey(normalizedHeader, map){
+  for(const key in map){
+    for(const variant of map[key]){
+      if(normalizedHeader.includes(variant)) return key;
+    }
+  }
+  return null;
+}
+
+/* Some schools put a merged title row above the real column headers
+   (e.g. "SCHOOL NAME – YEARLY PLAN | ICT | Y3 | 2026-2027"). We scan the
+   first few rows and pick whichever one matches the most recognizable
+   column headers, rather than assuming row 1 is always the header. */
+function findHeaderRowIndex(aoa, headerMap){
+  let best = {idx:0, score:-1};
+  for(let i=0;i<Math.min(aoa.length,6);i++){
+    const row = aoa[i] || [];
+    let score = 0;
+    row.forEach(cell=>{ if(matchKey(normHeader(cell), headerMap)) score++; });
+    if(score > best.score) best = {idx:i, score};
+  }
+  return best.score >= 3 ? best.idx : 0;
+}
+
+function sheetToRows(ws, headerMap){
+  const aoa = XLSX.utils.sheet_to_json(ws, {header:1, raw:false, defval:''});
+  if(!aoa.length) return {rows:[], headerIdx:0, titleText:''};
+  const headerIdx = findHeaderRowIndex(aoa, headerMap);
+  const headerRow = aoa[headerIdx];
+  const colMap = {};
+  headerRow.forEach((h,i)=>{ const k = matchKey(normHeader(h), headerMap); if(k) colMap[i]=k; });
+  const rows = [];
+  for(let r=headerIdx+1;r<aoa.length;r++){
+    const row = aoa[r];
+    if(!row || row.every(c=>String(c).trim()==='')) continue;
+    const obj = {idx:r};
+    for(const i in colMap) obj[colMap[i]] = row[i]!==undefined ? String(row[i]).trim() : '';
+    rows.push(obj);
+  }
+  const titleText = (aoa[0]||[]).join(' ');
+  return {rows, headerIdx, titleText};
+}
+
+/* ---- Turning "Term I - Aug" + "3-week: 31st - 4th" into real dates ---- */
+const MONTH_ABBR = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,sept:8,oct:9,nov:10,dec:11};
+function extractMonths(str){
+  const found = String(str||'').toLowerCase().match(/jan|feb|mar|apr|may|jun|jul|aug|sept|sep|oct|nov|dec/g) || [];
+  return found.map(m => MONTH_ABBR[m]);
+}
+function extractDayRange(str){
+  let s = String(str||'');
+  const colonIdx = s.indexOf(':');
+  if(colonIdx !== -1) s = s.slice(colonIdx+1); // ignore a leading "3-week:" style prefix
+  const nums = s.match(/\d{1,2}/g);
+  if(!nums || !nums.length) return null;
+  const a = parseInt(nums[0],10);
+  const b = nums.length>1 ? parseInt(nums[1],10) : a;
+  return [a,b];
+}
+function extractAcademicYears(text){
+  const m = String(text||'').match(/(20\d{2})\D+(20\d{2})/);
+  if(m) return [parseInt(m[1],10), parseInt(m[2],10)];
+  const single = String(text||'').match(/20\d{2}/);
+  if(single){ const y = parseInt(single[0],10); return [y, y+1]; }
+  const now = new Date().getFullYear();
+  return [now, now+1];
+}
+function isoDate(year, monthIdx, day){
+  return year + '-' + String(monthIdx+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+}
+/* Aug–Dec falls in the first calendar year of the academic year, Jan–Jul in the second. */
+function addComputedDates(rows, yearA, yearB){
+  rows.forEach(row=>{
+    const months = extractMonths(row.term);
+    const days = extractDayRange(row.week);
+    if(!months.length || !days) return;
+    const m1 = months[0], m2 = months.length>1 ? months[1] : months[0];
+    const yearForMonth = m => (m>=7 ? yearA : yearB);
+    row.start = isoDate(yearForMonth(m1), m1, days[0]);
+    row.end = isoDate(yearForMonth(m2), m2, days[1]);
+  });
+}
+
+/* Sheet-tab names can look like "ICT-Year 3", "Y4 ICT", "Y7-9 ENT" (a class
+   RANGE covering several classes with one shared tab), etc. We pull out every
+   "year/y/class/form/grade + number(-number)" reference as the class(es) this
+   tab covers, and treat whatever text is left over as the subject name. */
+const CLASS_TOKEN_RE = /\b(?:year|yr|y|class|form|grade)\.?\s*(\d{1,2})(?:\s*[-\u2013]\s*(\d{1,2}))?\b/gi;
+function extractYearsAndSubject(tabName){
+  let years = [];
+  let match;
+  CLASS_TOKEN_RE.lastIndex = 0;
+  while((match = CLASS_TOKEN_RE.exec(tabName)) !== null){
+    const a = parseInt(match[1],10);
+    const b = match[2] ? parseInt(match[2],10) : a;
+    for(let n=Math.min(a,b); n<=Math.max(a,b); n++) years.push(n);
+  }
+  const subject = tabName.replace(CLASS_TOKEN_RE, ' ').replace(/[-\u2013]/g,' ').replace(/\s+/g,' ').trim();
+  return { years: [...new Set(years)], subject: subject || tabName.trim() };
+}
+
+/* DATA[subject] is an ARRAY of {years:[...], rows:[...]} entries — an array
+   (not a plain object keyed by class) because one tab can cover several
+   classes at once (e.g. "Y7-9 ENT" covers Year 7, 8 and 9 together). */
+function parsePlanWorkbook(wb){
+  const data = {};
+  wb.SheetNames.forEach(name=>{
+    const {years, subject} = extractYearsAndSubject(name);
+    if(!subject || !years.length) return;
+    const {rows, titleText} = sheetToRows(wb.Sheets[name], PLAN_HEADER_MAP);
+    if(!rows.length) return;
+    const [yearA, yearB] = extractAcademicYears(titleText);
+    addComputedDates(rows, yearA, yearB);
+    if(!data[subject]) data[subject] = [];
+    data[subject].push({ years, rows });
+  });
+  return data;
+}
+function parseTimetableWorkbook(wb){
+  const sheetName = wb.SheetNames[0];
+  if(!sheetName) return [];
+  return sheetToRows(wb.Sheets[sheetName], TT_HEADER_MAP).rows;
+}
+
+function readFileAsWorkbook(file){
+  return new Promise((resolve,reject)=>{
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      try{
+        const wb = XLSX.read(e.target.result, {type:'array'});
+        resolve(wb);
+      }catch(err){ reject(err); }
+    };
+    reader.onerror = () => reject(new Error('Imeshindikana kusoma faili'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+let pendingPlanData = null;
+let pendingTTData = null;
+
+document.getElementById('planFileInput').addEventListener('change', async function(){
+  const file = this.files[0];
+  if(!file) return;
+  document.getElementById('setupErr').classList.remove('show');
+  try{
+    const wb = await readFileAsWorkbook(file);
+    const data = parsePlanWorkbook(wb);
+    if(!Object.keys(data).length){
+      showErr('setupErr','The file has no tabs in the "SUBJECT-Class" format with recognizable columns (Term, Week, Topic, Objectives...). Please check your file again.');
+      return;
+    }
+    pendingPlanData = data;
+    document.getElementById('planBox').classList.add('done');
+    document.getElementById('planFileName').textContent = file.name + ' — subjects: ' + Object.keys(data).join(', ');
+    updateContinueBtn();
+  }catch(err){
+    showErr('setupErr','Failed to read the Yearly Plan file: ' + err.message);
+  }
+});
+
+document.getElementById('ttFileInput').addEventListener('change', async function(){
+  const file = this.files[0];
+  if(!file) return;
+  document.getElementById('setupErr').classList.remove('show');
+  const isWord = /\.docx?$/i.test(file.name);
+  try{
+    const rows = isWord ? await parseTimetableFromWord(file) : parseTimetableWorkbook(await readFileAsWorkbook(file));
+    if(!rows.length){
+      showErr('setupErr','The timetable file has no recognizable table/columns (Day, Period, Time, Class, Subject, Duration).');
+      return;
+    }
+    pendingTTData = rows;
+    document.getElementById('ttBox').classList.add('done');
+    document.getElementById('ttFileName').textContent = file.name + ' — rows: ' + rows.length;
+    updateContinueBtn();
+  }catch(err){
+    showErr('setupErr','Failed to read the timetable file: ' + err.message);
+  }
+});
+
+/* Reads a .docx timetable: converts it to HTML with mammoth.js, then reads
+   the first <table> in the document exactly the same way we read an Excel
+   sheet (same header-matching logic), so a Word table works just like a
+   spreadsheet tab. */
+function parseTimetableFromWord(file){
+  return new Promise((resolve,reject)=>{
+    const reader = new FileReader();
+    reader.onload = async e => {
+      try{
+        const result = await mammoth.convertToHtml({arrayBuffer: e.target.result});
+        const doc = new DOMParser().parseFromString(result.value, 'text/html');
+        const table = doc.querySelector('table');
+        if(!table){ resolve([]); return; }
+        const aoa = Array.from(table.rows).map(tr =>
+          Array.from(tr.cells).map(td => td.textContent.trim())
+        );
+        if(!aoa.length){ resolve([]); return; }
+        const headerIdx = findHeaderRowIndex(aoa, TT_HEADER_MAP);
+        const headerRow = aoa[headerIdx];
+        const colMap = {};
+        headerRow.forEach((h,i)=>{ const k = matchKey(normHeader(h), TT_HEADER_MAP); if(k) colMap[i]=k; });
+        const rows = [];
+        for(let r=headerIdx+1;r<aoa.length;r++){
+          const row = aoa[r];
+          if(!row || row.every(c=>String(c).trim()==='')) continue;
+          const obj = {};
+          for(const i in colMap) obj[colMap[i]] = row[i]!==undefined ? String(row[i]).trim() : '';
+          rows.push(obj);
+        }
+        resolve(rows);
+      }catch(err){ reject(err); }
+    };
+    reader.onerror = () => reject(new Error('Could not read the Word file'));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+function updateContinueBtn(){
+  document.getElementById('continueBtn').disabled = !pendingPlanData;
+}
+
+async function continueToApp(){
+  if(!pendingPlanData) return;
+  DATA = pendingPlanData;
+  TIMETABLE = pendingTTData || [];
+
+  document.getElementById('continueBtn').disabled = true;
+  document.getElementById('setupOk').textContent = 'Inahifadhi kwenye akaunti yako...';
+  document.getElementById('setupOk').classList.add('show');
+
+  try{
+    await saveTeacherData(CURRENT_USER_ID, DATA, TIMETABLE);
+    document.getElementById('setupOk').textContent = 'Files saved to your account. Continuing...';
+    setTimeout(goToApp, 400);
+  }catch(e){
+    showErr('setupErr', 'Imeshindwa kuhifadhi data mtandaoni. Angalia mtandao kisha jaribu tena.');
+    document.getElementById('continueBtn').disabled = false;
+  }
+}
+
+/* ======================================================================
+   SUBJECT / CLASS DROPDOWNS
+====================================================================== */
+const subjSelect = document.getElementById('subj');
+const classSelect = document.getElementById('cls');
+const FIXED_CLASSES = ['Year 1','Year 2','Year 3','Year 4','Year 5','Year 6','Year 7','Year 8','Year 9','Year 10','Year 11','Year 12','Year 13'];
+
+/* Extracts the year NUMBER from a label like "Year 4", "Y4", "Class 04" etc.
+   Comparing by number (not substring) is what avoids "Year 1" incorrectly
+   matching "Year 10/11/12/13" — the bug that was causing mixed-up data. */
+function yearNum(str){
+  const m = String(str||'').match(/(\d{1,2})/);
+  return m ? parseInt(m[1],10) : null;
+}
+function sameClass(a,b){
+  const na = yearNum(a), nb = yearNum(b);
+  if(na!==null && nb!==null) return na===nb;
+  return normTxt(a)===normTxt(b);
+}
+function sameSubject(a,b){ return normTxt(a)===normTxt(b); }
+
+/* Class list is always the fixed Year 1–13 list, regardless of what has
+   been uploaded — this is populated once, right after login/setup. */
+function populateClassDropdown(){
+  classSelect.innerHTML = '<option value="">— Select class —</option>';
+  FIXED_CLASSES.forEach(yr=>{
+    const opt = document.createElement('option');
+    opt.value = yr; opt.textContent = yr;
+    classSelect.appendChild(opt);
+  });
+  subjSelect.innerHTML = '<option value="">— Select a class first —</option>';
+  subjSelect.disabled = true;
+}
+
+/* Once a Class is picked, Subject is filled in with only the subjects that
+   actually have a tab for that class in the uploaded Yearly Plan — each
+   shown like "ICT Y4" so it's unambiguous which tab it maps to. */
+classSelect.addEventListener('change', function(){
+  const selectedYear = this.value;
+  subjSelect.innerHTML = '';
+  if(!selectedYear){
+    subjSelect.innerHTML = '<option value="">— Select a class first —</option>';
+    subjSelect.disabled = true;
+    resetOutput();
+    return;
+  }
+  const shortYr = 'Y' + (yearNum(selectedYear) ?? '');
+  const selectedNum = yearNum(selectedYear);
+  let count = 0;
+  Object.keys(DATA).forEach(subject=>{
+    const entries = DATA[subject];
+    const entryIdx = entries.findIndex(e => e.years.includes(selectedNum));
+    if(entryIdx === -1) return;
+    const opt = document.createElement('option');
+    opt.value = subject;
+    opt.dataset.entryIdx = entryIdx;
+    opt.textContent = subject + ' ' + shortYr;
+    subjSelect.appendChild(opt);
+    count++;
+  });
+  if(count===0){
+    subjSelect.innerHTML = '<option value="">No subjects uploaded for ' + selectedYear + '</option>';
+    subjSelect.disabled = true;
+  } else {
+    subjSelect.insertAdjacentHTML('afterbegin', '<option value="">— Select subject —</option>');
+    subjSelect.disabled = false;
+  }
+  resetOutput();
+});
+subjSelect.addEventListener('change', resetOutput);
+function resetOutput(){
+  document.getElementById('sheet').style.display = 'none';
+  document.getElementById('toolbar').classList.remove('show');
+  document.getElementById('placeholder').style.display = 'flex';
+  document.getElementById('scheduleBox').style.display = 'none';
+  document.getElementById('fallbackBox').style.display = 'none';
+}
+
+function toggleMore(){
+  document.getElementById('moreFields').classList.toggle('open');
+}
+
+/* ======================================================================
+   LESSON PLAN GENERATION LOGIC (same core logic as the original system,
+   adapted to pull rows from DATA[subject][class] and match the
+   timetable by subject + class + day)
+====================================================================== */
+function splitList(str){
+  if(!str || str.trim()==='—' || str.trim()==='') return ['—'];
+  return str.split(';').map(s=>s.trim()).filter(Boolean);
+}
+function fmtDate(iso){
+  if(!iso) return '';
+  const d = new Date(iso+'T00:00:00');
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  return days[d.getDay()]+', '+d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+}
+function fmtDateShort(iso){
+  if(!iso) return '';
+  const d = new Date(iso+'T00:00:00');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear();
+}
+function findRow(classData, dateStr){
+  return classData.find(r => r.start && r.end && dateStr >= r.start && dateStr <= r.end);
+}
+function nearestRows(classData, dateStr){
+  let before=null, after=null;
+  classData.forEach(r=>{
+    if(!r.start) return;
+    if(r.end < dateStr){ if(!before || r.end>before.end) before=r; }
+    if(r.start > dateStr){ if(!after || r.start<after.start) after=r; }
+  });
+  return {before, after};
+}
+function populateFallback(classData){
+  const sel = document.getElementById('fallbackSelect');
+  sel.innerHTML = '';
+  classData.forEach(r=>{
+    const opt = document.createElement('option');
+    opt.value = r.idx;
+    const label = (r.topic||'').split('\n')[0];
+    opt.textContent = (r.start? fmtDateShort(r.start)+' – '+fmtDateShort(r.end)+' · ' : '') + label;
+    sel.appendChild(opt);
+  });
+}
+function previousRealTopic(classData, idx){
+  for(let i=idx-2;i>=0;i--){
+    const r = classData[i];
+    if(r && r.topic && !/^(end |mid-term|exam corrections)/i.test(r.topic) && r.objectives && r.objectives!=='—'){
+      return r.topic.split('\n')[0];
+    }
+  }
+  return null;
+}
+function guessAids(topicText){
+  const t = (topicText||'').toLowerCase();
+  const base = ['Computers / laptops','Projector or interactive whiteboard'];
+  const map = [
+    ['ms word', 'MS Word software'],
+    ['excel', 'MS Excel software'],
+    ['powerpoint', 'MS PowerPoint software'],
+    ['paint', 'MS Paint / Tux Paint software'],
+    ['tux paint', 'Tux Paint software'],
+    ['mswlogo', 'MSWLogo software'],
+    ['scratch', 'Scratch software'],
+    ['qb64', 'QB64 software'],
+    ['html', 'Text editor (Notepad) and web browser'],
+    ['css', 'Text editor (Notepad) and web browser'],
+    ['javascript', 'Text editor (Notepad) and web browser'],
+    ['python', 'Python IDLE'],
+    ['access', 'MS Access software'],
+    ['openoffice', 'OpenOffice suite'],
+    ['flash', 'Macromedia Flash software'],
+    ['email', 'Internet connection and email account'],
+    ['internet', 'Internet connection and web browser'],
+    ['network', 'Network diagrams / charts'],
+    ['artificial intelligence', 'AI demonstration videos / sample applications'],
+    ['database', 'Database management software'],
+    ['entreprene', 'Case studies / business examples'],
+    ['business', 'Case studies / business examples'],
+    ['market', 'Sample product / market survey materials'],
+  ];
+  let extra = [];
+  map.forEach(([k,v])=>{ if(t.includes(k) && !extra.includes(v)) extra.push(v); });
+  const aids = base.concat(extra, ['Printed worksheets / handouts']);
+  return aids.join(', ');
+}
+
+const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+function to12h(hhmm){
+  const parts = String(hhmm).split(':').map(Number);
+  let h = parts[0]||0, m = parts[1]||0;
+  const suf = h>=12 ? 'PM' : 'AM';
+  let h12 = h % 12; if(h12===0) h12=12;
+  return h12+':'+String(m).padStart(2,'0')+' '+suf;
+}
+function minutesBetween(start,end){
+  const [h1,m1]=String(start).split(':').map(Number), [h2,m2]=String(end).split(':').map(Number);
+  return (h2*60+m2)-(h1*60+m1);
+}
+function normTxt(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9]/g,''); }
+
+/* Matches the uploaded timetable rows against the chosen subject + class + date.
+   Class is compared by YEAR NUMBER (via sameClass, defined near the dropdown
+   logic above) rather than substring, so "Year 1" never gets confused with
+   "Year 10/11/12/13" — subject and day are compared by exact normalized text. */
+function getSchedule(subject, cls, dateStr){
+  if(!dateStr) return null;
+  const d = new Date(dateStr+'T00:00:00');
+  const dayName = DAY_NAMES[d.getDay()];
+  if(!TIMETABLE.length) return {dayName, found:false};
+
+  const entry = TIMETABLE.find(row =>
+    normTxt(row.day)===normTxt(dayName) && sameClass(row.cls, cls) && sameSubject(row.subject, subject)
+  );
+  if(!entry) return {dayName, found:false};
+
+  let timeStr = entry.time || '';
+  let duration = Number(entry.duration) || null;
+  if(timeStr.includes('-') || timeStr.includes('–')){
+    const sep = timeStr.includes('–') ? '–' : '-';
+    const [a,b] = timeStr.split(sep).map(s=>s.trim());
+    if(/^\d{1,2}:\d{2}$/.test(a) && /^\d{1,2}:\d{2}$/.test(b)){
+      if(!duration) duration = minutesBetween(a,b);
+      timeStr = to12h(a) + ' – ' + to12h(b);
+    }
+  }
+  return { dayName, found:true, period: entry.period || '—', time: timeStr || '—', duration: duration || 45 };
+}
+
+function renderRow(row, subject, cls, classData, students, extras){
+  document.getElementById('placeholder').style.display='none';
+  document.getElementById('toolbar').classList.add('show');
+  const sheet = document.getElementById('sheet');
+  sheet.style.display='block';
+
+  const topicLines = (row.topic||'—').split('\n');
+  const mainTopic = topicLines[0] || '—';
+  const subTopic = topicLines.slice(1).join(' — ') || '—';
+
+  document.getElementById('outSubject').textContent = subject;
+  document.getElementById('outClassStream').textContent = cls + ' / ' + (extras.stream || '---');
+  document.getElementById('outDate').textContent = extras.dateStr ? fmtDate(extras.dateStr) : '—';
+  document.getElementById('outDay').textContent = extras.dayName || '—';
+  document.getElementById('outTime').textContent = extras.time || '—';
+  document.getElementById('outDuration').textContent = extras.duration ? extras.duration+' minutes' : '45 minutes (default)';
+  const boysN = Number(extras.boys)||0, girlsN = Number(extras.girls)||0;
+  document.getElementById('outBoysGirls').textContent = (extras.boys || extras.girls) ? (extras.boys||'0')+' / '+(extras.girls||'0') : '—';
+  document.getElementById('outTotal').textContent = students || ((boysN+girlsN) || '—');
+  const termClean = (row.term||'—').split('-')[0].trim() || '—';
+  const weekClean = (row.week||'—').split(':')[0].trim() || '—';
+  document.getElementById('outTermWeek').textContent = termClean + ' / ' + weekClean;
+  document.getElementById('outPeriod').textContent = extras.period || '—';
+  document.getElementById('outTopic').textContent = mainTopic;
+  document.getElementById('outSubtopic').textContent = subTopic;
+
+  const objectivesList = splitList(row.objectives);
+  const successList = splitList(row.success);
+  const mainObjective = objectivesList[0] || '—';
+  const mainSuccess = successList[0] || '—';
+  document.getElementById('outBroad').textContent = 'By the end of this lesson, the student should have a clear understanding of "' + mainTopic.replace(/^Ch\.\d+\s*[–-]\s*/,'') + '" and be able to apply the related skills confidently.';
+
+  const objBody = document.getElementById('outObjectives'); objBody.innerHTML='';
+  const tr=document.createElement('tr');
+  const tdO=document.createElement('td'); tdO.textContent = mainObjective;
+  const tdS=document.createElement('td'); tdS.textContent = mainSuccess;
+  tr.appendChild(tdO); tr.appendChild(tdS); objBody.appendChild(tr);
+
+  const duration = Number(extras.duration) || 45;
+  const introMin = 5, conclMin = 10;
+  const mainMin = Math.max(duration - introMin - conclMin, 5);
+  document.getElementById('actLabel').textContent = 'Teaching / Learning Activities (Total: '+duration+' minutes)';
+  document.getElementById('timeIntro').textContent = introMin+' min';
+  document.getElementById('timeMain').textContent = mainMin+' min';
+  document.getElementById('timeConcl').textContent = conclMin+' min';
+
+  document.getElementById('outAids').textContent = guessAids(row.topic);
+  document.getElementById('outRefs').textContent = subject+' Scheme of Work — '+cls+'; '+CURRENT_PROFILE.school+' Yearly Academic Plan' + (row.topic && row.topic.match(/Ch\.\d+/) ? '; Course textbook, ' + row.topic.match(/Ch\.\d+[^\n]*/)[0] : '');
+
+  const prevTopic = previousRealTopic(classData, row.idx);
+  document.getElementById('outIntro').textContent = prevTopic
+    ? 'Teacher briefly reviews the previous lesson on "'+prevTopic+'" through question and answer, then introduces today\'s topic: "'+mainTopic+'".'
+    : 'Teacher introduces today\'s topic through a short discussion and questions to gauge learners\' existing knowledge of "'+mainTopic+'".';
+
+  const activities = splitList(row.activities).filter(a=>a!=='—');
+  const assessmentList = splitList(row.assessment);
+
+  document.getElementById('tIntro').textContent = (prevTopic ? 'Reviews the previous lesson ("'+prevTopic+'") and links it to today\'s topic. ' : '') + 'Introduces the topic "'+mainTopic+'" and states the lesson objectives.';
+  document.getElementById('lIntro').textContent = 'Listen attentively, recall previous knowledge, and respond to the teacher\'s introductory questions.';
+
+  document.getElementById('tMain').textContent = 'Guides and facilitates the following activities: ' + (activities.length ? activities.join('; ') + '.' : 'Explains the topic step by step and demonstrates the required skills.');
+  document.getElementById('lMain').textContent = 'Participate actively in the activities above, practise the skills individually or in pairs/groups, and ask questions where necessary.';
+
+  document.getElementById('tConcl').textContent = 'Summarises the key points of the lesson and conducts assessment: ' + (assessmentList.length ? assessmentList.join('; ') + '.' : 'oral questions and observation.');
+  document.getElementById('lConcl').textContent = 'Respond to the summary questions and complete the assessment task(s) given by the teacher.';
+
+  const assUl = document.getElementById('outAssessment'); assUl.innerHTML='';
+  assessmentList.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; assUl.appendChild(li); });
+
+  document.getElementById('outSummary').textContent = 'Ask 2–3 students: "' + generalizeQuestion(mainObjective, mainTopic) + '" — if learners struggle to answer, revisit this point briefly at the start of the next lesson.';
+
+  sheet.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function generalizeQuestion(objective, topic){
+  if(!objective || objective==='—'){
+    return 'In your own words, what is one new thing you learned about "'+topic+'" today?';
+  }
+  let q = objective.trim();
+  q = q.charAt(0).toLowerCase() + q.slice(1);
+  q = q.replace(/[.;]+$/, '');
+  return 'Can you show or explain how to ' + q + '?';
+}
+
+document.getElementById('fallbackSelect').addEventListener('change', function(){
+  const subject = subjSelect.value;
+  const cls = classSelect.value;
+  const entryIdx = subjSelect.selectedOptions[0] ? subjSelect.selectedOptions[0].dataset.entryIdx : null;
+  if(entryIdx === null || entryIdx === undefined) return;
+  const entry = DATA[subject][entryIdx];
+  const classData = entry.rows;
+  const clsLabel = entry.years.length > 1
+    ? 'Year ' + Math.min(...entry.years) + '-' + Math.max(...entry.years) + ' (combined)'
+    : cls;
+  const row = classData.find(r=>String(r.idx)===this.value);
+  const dateStr = document.getElementById('dt').value;
+  const extras = collectExtras();
+  if(dateStr){
+    const d = new Date(dateStr+'T00:00:00');
+    extras.dayName = DAY_NAMES[d.getDay()];
+  }
+  if(row) renderRow(row, subject, clsLabel, classData, document.getElementById('students').value, extras);
+});
+
+function collectExtras(){
+  return {
+    dateStr: document.getElementById('dt').value,
+    stream: document.getElementById('stream').value,
+    time: document.getElementById('time').value,
+    period: document.getElementById('period').value,
+    boys: document.getElementById('boys').value,
+    girls: document.getElementById('girls').value,
+    duration: document.getElementById('duration').value,
+  };
+}
+
+function generatePlan(){
+  const subject = subjSelect.value;
+  const cls = classSelect.value;
+  const dateStr = document.getElementById('dt').value;
+  const students = document.getElementById('students').value;
+  const fallbackBox = document.getElementById('fallbackBox');
+  const scheduleBox = document.getElementById('scheduleBox');
+
+  if(!cls){ alert('Please select a class.'); return; }
+  if(!subject){ alert('Please select a subject first.'); return; }
+  if(!dateStr){ alert('Please enter the lesson date.'); return; }
+
+  const entryIdx = subjSelect.selectedOptions[0] ? subjSelect.selectedOptions[0].dataset.entryIdx : null;
+  if(entryIdx === null || entryIdx === undefined || !DATA[subject] || !DATA[subject][entryIdx]){
+    alert('Could not find data for this subject/class combination in your uploaded Yearly Plan.');
+    return;
+  }
+  const entry = DATA[subject][entryIdx];
+  const clsLabel = entry.years.length > 1
+    ? 'Year ' + Math.min(...entry.years) + '-' + Math.max(...entry.years) + ' (combined)'
+    : cls;
+
+  const sched = getSchedule(subject, cls, dateStr);
+  scheduleBox.style.display = 'block';
+  if(sched && sched.found){
+    document.getElementById('time').value = sched.time;
+    document.getElementById('period').value = sched.period;
+    document.getElementById('duration').value = sched.duration;
+    document.getElementById('moreFields').classList.add('open');
+    scheduleBox.className = 'schedule-box ok';
+    scheduleBox.textContent = '✓ Found on timetable: ' + sched.dayName + ', Period ' + sched.period + ' (' + sched.time + ')';
+  } else if(sched){
+    scheduleBox.className = 'schedule-box warn';
+    scheduleBox.textContent = '⚠ ' + subject + ' / ' + cls + ' is not on your timetable for ' + sched.dayName + '. Enter Time/Period/Duration manually below, or check that your uploaded timetable has the matching row.';
+  } else {
+    scheduleBox.style.display = 'none';
+  }
+
+  const extras = collectExtras();
+  extras.dayName = sched ? sched.dayName : '';
+
+  const classData = entry.rows;
+  const row = findRow(classData, dateStr);
+
+  if(row){
+    fallbackBox.style.display='none';
+    renderRow(row, subject, clsLabel, classData, students, extras);
+  } else {
+    const {before, after} = nearestRows(classData, dateStr);
+    let msg = 'This date falls outside the regular teaching weeks (likely a holiday or assessment period). ';
+    if(before && before.topic && before.topic.toUpperCase().includes('END')){
+      msg += 'It looks like this falls under "'+before.topic.split('\n')[0]+'". ';
+    }
+    msg += 'Please select the matching week below:';
+    document.getElementById('fallbackMsg').textContent = msg;
+    populateFallback(classData);
+    fallbackBox.style.display='block';
+
+    const pick = after || before || classData[0];
+    if(pick){
+      document.getElementById('fallbackSelect').value = pick.idx;
+      renderRow(pick, subject, clsLabel, classData, students, extras);
+    }
+  }
+}
+
+/* ======================================================================
+   MAGIC CLICK EFFECT — sparkle + colour pulse on any go-btn, then runs
+   the given callback (works for login, signup, continue, and generate)
+====================================================================== */
+function magicClick(evt, callback){
+  const btn = evt.currentTarget;
+  const rect = btn.getBoundingClientRect();
+  const cx = evt.clientX ? evt.clientX - rect.left : rect.width/2;
+  const cy = evt.clientY ? evt.clientY - rect.top : rect.height/2;
+
+  btn.classList.remove('magic-pop');
+  void btn.offsetWidth;
+  btn.classList.add('magic-pop');
+
+  const N = 12;
+  for(let i=0;i<N;i++){
+    const s = document.createElement('span');
+    s.className = 'sparkle';
+    const angle = (Math.PI*2*i)/N + Math.random()*0.5;
+    const dist = 26 + Math.random()*36;
+    s.style.setProperty('--dx', Math.cos(angle)*dist + 'px');
+    s.style.setProperty('--dy', Math.sin(angle)*dist + 'px');
+    s.style.left = cx + 'px';
+    s.style.top = cy + 'px';
+    s.style.background = ['#ffffff','#ffe9b8','#bfe9df','#ffd0b0'][i % 4];
+    btn.appendChild(s);
+    s.addEventListener('animationend', () => s.remove());
+  }
+  setTimeout(() => btn.classList.remove('magic-pop'), 600);
+  if(typeof callback === 'function') callback();
+}
+</script>
+</body>
+</html>
