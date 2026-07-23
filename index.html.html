@@ -325,6 +325,7 @@
     </div>
     <div class="topbar-right">
       <button class="chip-btn" id="langToggleBtn" onclick="toggleLang()">SW</button>
+      <button class="chip-btn hidden" id="adminBtn" onclick="goToAdmin()" data-i18n="adminBtn">🛡️ Admin</button>
       <div class="teacher-chip"><span class="dot"></span><span id="teacherChipText">—</span></div>
       <button class="chip-btn" id="changeFilesBtn" data-i18n="changeFiles">Change Files</button>
       <button class="chip-btn" id="logoutBtn" data-i18n="logout">Log Out</button>
@@ -341,7 +342,17 @@
         <div class="field"><label data-i18n="emailLabel">Email</label><input type="email" id="loginEmail" placeholder="jina@shule.ac.tz"></div>
         <div class="field"><label data-i18n="passLabel">Password</label><input type="password" id="loginPass" placeholder="••••••••"></div>
         <button class="go-btn" onclick="magicClick(event, doLogin)" data-i18n="loginBtn">Log In →</button>
+        <p class="switch-link"><a onclick="showForgot()" data-i18n="forgotLink">Forgot your password?</a></p>
         <p class="switch-link"><span data-i18n="noAccount">Don't have an account?</span> <a onclick="showSignup()" data-i18n="createAccountLink">Create a new account</a></p>
+      </div>
+      <div id="forgotForm" class="hidden">
+        <h2 data-i18n="forgotTitle">Reset Your Password</h2>
+        <p class="sub" data-i18n="forgotSub">Enter your account email — we'll send you a link to set a new password.</p>
+        <div class="err-msg" id="forgotErr"></div>
+        <div class="ok-msg" id="forgotOk"></div>
+        <div class="field"><label data-i18n="schoolEmailLabel">School Email</label><input type="email" id="forgotEmail" placeholder="jina@shule.ac.tz"></div>
+        <button class="go-btn" id="forgotBtn" onclick="magicClick(event, doForgotPassword)" data-i18n="forgotBtn">Send Reset Link →</button>
+        <p class="switch-link"><span data-i18n="rememberedPass">Remembered it?</span> <a onclick="showLogin()" data-i18n="loginLink">Log in here</a></p>
       </div>
       <div id="signupForm" class="hidden">
         <h2 data-i18n="signupTitle">Create a New Account</h2>
@@ -359,6 +370,19 @@
   </div>
 
   <!-- ============ SETUP SCREEN (upload files) ============ -->
+  <!-- ============ NEW PASSWORD SCREEN (after clicking email reset link) ============ -->
+  <div class="center-stage hidden" id="screenNewPassword">
+    <div class="auth-card">
+      <h2 data-i18n="newPassTitle">Set a New Password</h2>
+      <p class="sub" data-i18n="newPassSub">Choose a new password for your account.</p>
+      <div class="err-msg" id="newPassErr"></div>
+      <div class="ok-msg" id="newPassOk"></div>
+      <div class="field"><label data-i18n="passLabel">Password</label><input type="password" id="newPass1" placeholder="at least 6 characters"></div>
+      <div class="field"><label data-i18n="confirmPassLabel">Confirm Password</label><input type="password" id="newPass2" placeholder="re-enter password"></div>
+      <button class="go-btn" id="newPassBtn" onclick="magicClick(event, doSetNewPassword)" data-i18n="newPassBtn">Save New Password →</button>
+    </div>
+  </div>
+
   <div class="center-stage hidden" id="screenSetup">
     <div class="setup-card">
       <h2 data-i18n="setupTitle">Upload System Files</h2>
@@ -665,6 +689,51 @@
     </div>
 
   </div>
+
+  <!-- ============ ADMIN DASHBOARD ============ -->
+  <div class="console hidden" id="screenAdmin" style="display:block;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+      <button class="chip-btn" onclick="goToAppFromAdmin()" data-i18n="backToApp">← Back to System</button>
+      <h2 style="font-family:'Space Grotesk',sans-serif;color:#e8eef3;font-size:20px;margin:0;" data-i18n="adminDashTitle">Admin Dashboard</h2>
+      <span style="width:120px;"></span>
+    </div>
+
+    <div class="panel" style="width:100%;max-width:none;">
+      <p class="panel-label" data-i18n="adminTeachersLabel">Teachers</p>
+      <div id="adminTeacherList" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <div class="panel hidden" id="adminManageBox" style="width:100%;max-width:none;margin-top:20px;">
+      <p class="panel-label" data-i18n="adminManageLabel">Manage Admins</p>
+      <div id="adminList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;"></div>
+
+      <div class="row2">
+        <div class="field">
+          <label data-i18n="adminEmailLabel">Email to grant admin</label>
+          <input type="email" id="newAdminEmail" placeholder="mkuu@shule.ac.tz">
+        </div>
+        <div class="field">
+          <label data-i18n="adminScopeLabel">Scope</label>
+          <select id="newAdminScope">
+            <option value="global" data-i18n="adminScopeGlobal">Global (all schools)</option>
+            <option value="school" data-i18n="adminScopeSchool">One school only</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" id="adminSchoolNameField" style="display:none;">
+        <label data-i18n="adminSchoolNameLabel">School name (exact match)</label>
+        <input type="text" id="newAdminSchoolName" placeholder="mfano: Easyshule Secondary School">
+      </div>
+      <div class="err-msg" id="adminErr"></div>
+      <button class="go-btn" onclick="magicClick(event, grantAdmin)" data-i18n="adminGrantBtn">Grant Admin Access →</button>
+    </div>
+
+    <div class="paper-area" id="adminDetailArea" style="display:none;">
+      <button class="chip-btn" style="margin-bottom:14px;" onclick="closeAdminDetail()" data-i18n="closeDetail">✕ Close</button>
+      <div id="adminDetailContent"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -675,8 +744,8 @@
    wa data unatoka kwenye Row Level Security (RLS) policies za database,
    siyo kwa kuficha key hii.
 ====================================================================== */
-const SUPABASE_URL = 'https://kaxkycnbfpjhlealxhnj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtheGt5Y25iZnBqaGxlYWx4aG5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ2NjM4ODQsImV4cCI6MjEwMDIzOTg4NH0.aZO_d9uy79QBeZGGVIcFqoO2DjBxCtv6l-14t-11MmQ';
+const SUPABASE_URL = 'https://YOUR-PROJECT-REF.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -704,9 +773,24 @@ async function saveTeacherData(userId, planData, timetableData){
       user_id: userId,
       plan_data: planData,
       timetable_data: timetableData,
+      school: (CURRENT_PROFILE && CURRENT_PROFILE.school) || null,
       updated_at: new Date().toISOString()
     });
   if(error){ console.error('saveTeacherData error', error); throw error; }
+}
+
+/* --- Profile (jina/shule/email) — jedwali la umma "profiles", linatumika
+       na Admin Dashboard kuonyesha orodha ya walimu --- */
+async function upsertProfile(user){
+  const meta = user.user_metadata || {};
+  try{
+    await sb.from('profiles').upsert({
+      id: user.id,
+      email: user.email,
+      name: meta.teacher_name || (user.email ? user.email.split('@')[0] : 'Mwalimu'),
+      school: meta.school_name || 'Shule Yangu'
+    });
+  }catch(e){ console.error('upsertProfile error', e); }
 }
 
 /* ======================================================================
@@ -715,10 +799,47 @@ async function saveTeacherData(userId, planData, timetableData){
 function showLogin(){
   document.getElementById('loginForm').classList.remove('hidden');
   document.getElementById('signupForm').classList.add('hidden');
+  document.getElementById('forgotForm').classList.add('hidden');
 }
 function showSignup(){
   document.getElementById('loginForm').classList.add('hidden');
   document.getElementById('signupForm').classList.remove('hidden');
+  document.getElementById('forgotForm').classList.add('hidden');
+}
+function showForgot(){
+  document.getElementById('loginForm').classList.add('hidden');
+  document.getElementById('signupForm').classList.add('hidden');
+  document.getElementById('forgotForm').classList.remove('hidden');
+}
+
+async function doForgotPassword(){
+  hideErr('forgotErr');
+  const okEl = document.getElementById('forgotOk');
+  okEl.classList.remove('show'); okEl.textContent = '';
+
+  const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    showErr('forgotErr', currentLang === 'sw' ? 'Weka barua pepe sahihi.' : 'Please enter a valid email.');
+    return;
+  }
+
+  const btn = document.getElementById('forgotBtn');
+  btn.disabled = true;
+
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + window.location.pathname
+  });
+
+  btn.disabled = false;
+
+  if(error){
+    showErr('forgotErr', error.message);
+    return;
+  }
+  okEl.textContent = currentLang === 'sw'
+    ? 'Tumetuma link ya kubadili password kwenye barua pepe yako (kama akaunti ipo). Angalia inbox / spam.'
+    : 'A reset link has been sent to your email (if the account exists). Check your inbox / spam folder.';
+  okEl.classList.add('show');
 }
 
 function showErr(id, msg){
@@ -810,6 +931,9 @@ async function enterAppForUser(user){
   document.getElementById('outTeacher').textContent = CURRENT_PROFILE.name;
   document.getElementById('outFooter').textContent = 'Generated automatically from the Yearly Academic Plan · ' + CURRENT_PROFILE.school;
 
+  upsertProfile(user);
+  checkAdminStatus(user.email);
+
   let saved = null;
   try{
     saved = await loadTeacherData(user.id);
@@ -844,6 +968,61 @@ document.getElementById('logoutBtn').addEventListener('click', doLogout);
     enterAppForUser(data.session.user);
   }
 })();
+
+/* If the user arrived here via the "reset password" email link, Supabase
+   fires PASSWORD_RECOVERY — show the "set a new password" screen instead
+   of logging them straight into the app. */
+sb.auth.onAuthStateChange((event, session) => {
+  if(event === 'PASSWORD_RECOVERY'){
+    document.getElementById('screenAuth').classList.add('hidden');
+    document.getElementById('screenSetup').classList.add('hidden');
+    document.getElementById('screenApp').classList.add('hidden');
+    document.getElementById('topbar').classList.add('hidden');
+    document.getElementById('screenNewPassword').classList.remove('hidden');
+  }
+});
+
+async function doSetNewPassword(){
+  hideErr('newPassErr');
+  const okEl = document.getElementById('newPassOk');
+  okEl.classList.remove('show'); okEl.textContent = '';
+
+  const p1 = document.getElementById('newPass1').value;
+  const p2 = document.getElementById('newPass2').value;
+
+  if(p1.length < 6){
+    showErr('newPassErr', currentLang === 'sw' ? 'Password iwe na herufi 6 au zaidi.' : 'Password must be at least 6 characters.');
+    return;
+  }
+  if(p1 !== p2){
+    showErr('newPassErr', currentLang === 'sw' ? 'Password hazifanani.' : 'Passwords do not match.');
+    return;
+  }
+
+  const btn = document.getElementById('newPassBtn');
+  btn.disabled = true;
+
+  const { error } = await sb.auth.updateUser({ password: p1 });
+
+  btn.disabled = false;
+
+  if(error){
+    showErr('newPassErr', error.message);
+    return;
+  }
+
+  okEl.textContent = currentLang === 'sw'
+    ? 'Password imebadilishwa! Unaelekezwa kuingia...'
+    : 'Password updated! Redirecting to log in...';
+  okEl.classList.add('show');
+
+  setTimeout(async () => {
+    await sb.auth.signOut();
+    document.getElementById('screenNewPassword').classList.add('hidden');
+    document.getElementById('screenAuth').classList.remove('hidden');
+    showLogin();
+  }, 1800);
+}
 
 /* ======================================================================
    FILE PARSING — Yearly Plan (one tab per subject+class) & Timetable
@@ -1552,6 +1731,20 @@ const STRINGS = {
     schoolLabel: "School Name", teacherNameLabel: "Your Name (Teacher)",
     schoolEmailLabel: "School Email", confirmPassLabel: "Confirm Password",
     signupBtn: "Create Account →", hasAccount: "Already have an account?", loginLink: "Log in here",
+    forgotLink: "Forgot your password?",
+    forgotTitle: "Reset Your Password",
+    forgotSub: "Enter your account email — we'll send you a link to set a new password.",
+    forgotBtn: "Send Reset Link →",
+    rememberedPass: "Remembered it?",
+    newPassTitle: "Set a New Password",
+    newPassSub: "Choose a new password for your account.",
+    newPassBtn: "Save New Password →",
+    adminBtn: "🛡️ Admin", backToApp: "← Back to System", adminDashTitle: "Admin Dashboard",
+    adminTeachersLabel: "Teachers", adminManageLabel: "Manage Admins",
+    adminEmailLabel: "Email to grant admin", adminScopeLabel: "Scope",
+    adminScopeGlobal: "Global (all schools)", adminScopeSchool: "One school only",
+    adminSchoolNameLabel: "School name (exact match)", adminGrantBtn: "Grant Admin Access →",
+    closeDetail: "✕ Close",
     setupTitle: "Upload System Files",
     setupSub: "Upload your Yearly Academic Plan / Scheme of Work and your Teaching Timetable, so the system can generate Lesson Plans automatically.",
     planFileTitle: "Yearly Academic Plan / Scheme of Work",
@@ -1591,6 +1784,20 @@ const STRINGS = {
     schoolLabel: "Jina la Shule", teacherNameLabel: "Jina Lako (Mwalimu)",
     schoolEmailLabel: "Barua Pepe ya Shule", confirmPassLabel: "Thibitisha Password",
     signupBtn: "Fungua Akaunti →", hasAccount: "Una akaunti tayari?", loginLink: "Ingia hapa",
+    forgotLink: "Umesahau password?",
+    forgotTitle: "Badilisha Password Yako",
+    forgotSub: "Weka barua pepe ya akaunti yako — tutakutumia link ya kuweka password mpya.",
+    forgotBtn: "Tuma Link ya Kubadili →",
+    rememberedPass: "Umeikumbuka?",
+    newPassTitle: "Weka Password Mpya",
+    newPassSub: "Chagua password mpya kwa akaunti yako.",
+    newPassBtn: "Hifadhi Password Mpya →",
+    adminBtn: "🛡️ Admin", backToApp: "← Rudi Kwenye Mfumo", adminDashTitle: "Dashibodi ya Admin",
+    adminTeachersLabel: "Walimu", adminManageLabel: "Simamia Wasimamizi",
+    adminEmailLabel: "Barua pepe ya kupewa Admin", adminScopeLabel: "Wigo",
+    adminScopeGlobal: "Wote (shule zote)", adminScopeSchool: "Shule moja tu",
+    adminSchoolNameLabel: "Jina la shule (lilinganifu kabisa)", adminGrantBtn: "Mpe Uadmin →",
+    closeDetail: "✕ Funga",
     setupTitle: "Pakia Faili za Mfumo",
     setupSub: "Pakia Mpango wako wa Mwaka wa Kitaaluma / Scheme of Work na Ratiba yako ya Vipindi, ili mfumo uweze kutengeneza Mipango ya Somo kiotomatiki.",
     planFileTitle: "Mpango wa Mwaka wa Kitaaluma / Scheme of Work",
@@ -1718,6 +1925,7 @@ async function generateAIPlan(){
       await sb.from('ai_lesson_plans').insert({
         user_id: CURRENT_USER_ID,
         subject, grade, topic, duration,
+        school: (CURRENT_PROFILE && CURRENT_PROFILE.school) || null,
         plan_json: planJson
       });
       aiHistoryLoaded = false;
@@ -1812,6 +2020,208 @@ async function loadAIHistory(){
     listEl.innerHTML = '<p style="color:#f0c9b7;font-size:12px;">' +
       (currentLang === 'sw' ? 'Imeshindwa kupakia historia.' : 'Failed to load history.') + '</p>';
   }
+}
+
+/* ======================================================================
+   ADMIN DASHBOARD
+   "admins" table (checked via checkAdminStatus) controls who sees the
+   🛡️ Admin button. Scope is either 'global' (sees every school) or a
+   specific school name (sees only that school's teachers).
+====================================================================== */
+let CURRENT_ADMIN_SCOPE = null; // null = not admin, 'global', or a school name
+
+async function checkAdminStatus(email){
+  try{
+    const { data, error } = await sb
+      .from('admins')
+      .select('scope')
+      .eq('email', email)
+      .maybeSingle();
+    if(error) throw error;
+    CURRENT_ADMIN_SCOPE = data ? data.scope : null;
+  }catch(e){
+    CURRENT_ADMIN_SCOPE = null;
+  }
+  const btn = document.getElementById('adminBtn');
+  if(CURRENT_ADMIN_SCOPE){
+    btn.classList.remove('hidden');
+  } else {
+    btn.classList.add('hidden');
+  }
+}
+
+function goToAdmin(){
+  document.getElementById('screenApp').classList.add('hidden');
+  document.getElementById('screenSetup').classList.add('hidden');
+  document.getElementById('screenAdmin').classList.remove('hidden');
+  document.getElementById('adminDetailArea').style.display = 'none';
+  loadAdminTeachers();
+  if(CURRENT_ADMIN_SCOPE === 'global'){
+    document.getElementById('adminManageBox').classList.remove('hidden');
+    loadAdminList();
+  } else {
+    document.getElementById('adminManageBox').classList.add('hidden');
+  }
+}
+
+function goToAppFromAdmin(){
+  document.getElementById('screenAdmin').classList.add('hidden');
+  document.getElementById('screenApp').classList.remove('hidden');
+}
+
+async function loadAdminTeachers(){
+  const listEl = document.getElementById('adminTeacherList');
+  listEl.innerHTML = '<p style="color:#9fb3c8;font-size:12px;">Loading...</p>';
+  try{
+    let query = sb.from('profiles').select('id, email, name, school').order('school');
+    if(CURRENT_ADMIN_SCOPE !== 'global'){
+      query = query.eq('school', CURRENT_ADMIN_SCOPE);
+    }
+    const { data, error } = await query;
+    if(error) throw error;
+
+    if(!data || !data.length){
+      listEl.innerHTML = '<p style="color:#9fb3c8;font-size:12px;">' +
+        (currentLang === 'sw' ? 'Hakuna mwalimu bado.' : 'No teachers yet.') + '</p>';
+      return;
+    }
+
+    listEl.innerHTML = '';
+    data.forEach(p => {
+      const row = document.createElement('div');
+      row.style.cssText = 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);' +
+        'border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;';
+      row.innerHTML = '<div><div style="color:#e8eef3;font-weight:600;font-size:13.5px;">' + escapeHtml(p.name) + '</div>' +
+        '<div style="color:#9fb3c8;font-size:12px;">' + escapeHtml(p.email) + ' · ' + escapeHtml(p.school) + '</div></div>' +
+        '<span style="color:var(--amber);font-size:12px;">' + (currentLang === 'sw' ? 'Angalia →' : 'View →') + '</span>';
+      row.addEventListener('click', () => viewTeacherDetail(p));
+      listEl.appendChild(row);
+    });
+  }catch(e){
+    console.error('loadAdminTeachers error', e);
+    listEl.innerHTML = '<p style="color:#f0c9b7;font-size:12px;">' +
+      (currentLang === 'sw' ? 'Imeshindwa kupakia orodha ya walimu.' : 'Failed to load teachers.') + '</p>';
+  }
+}
+
+async function viewTeacherDetail(profile){
+  const area = document.getElementById('adminDetailArea');
+  const content = document.getElementById('adminDetailContent');
+  area.style.display = 'block';
+  content.innerHTML = '<p style="color:#9fb3c8;">Loading...</p>';
+
+  let hasYearlyPlan = false;
+  let aiPlans = [];
+
+  try{
+    const { data: td } = await sb.from('teacher_data').select('plan_data').eq('user_id', profile.id).maybeSingle();
+    hasYearlyPlan = !!(td && td.plan_data && Object.keys(td.plan_data).length);
+  }catch(e){ /* ignore */ }
+
+  try{
+    const { data: ai } = await sb.from('ai_lesson_plans')
+      .select('subject, grade, topic, created_at')
+      .eq('user_id', profile.id)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    aiPlans = ai || [];
+  }catch(e){ /* ignore */ }
+
+  let html = '<h3 style="color:var(--ink);font-family:\'Space Grotesk\',sans-serif;margin-bottom:4px;">' + escapeHtml(profile.name) + '</h3>';
+  html += '<p style="color:var(--text-soft);font-size:13px;margin-bottom:18px;">' + escapeHtml(profile.email) + ' · ' + escapeHtml(profile.school) + '</p>';
+  html += '<p style="margin-bottom:14px;"><strong>' + (currentLang === 'sw' ? 'Mpango wa Mwaka:' : 'Yearly Plan:') + '</strong> ' +
+    (hasYearlyPlan ? '✅ ' + (currentLang === 'sw' ? 'Imepakiwa' : 'Uploaded') : '⬜ ' + (currentLang === 'sw' ? 'Bado hajapakia' : 'Not uploaded yet')) + '</p>';
+  html += '<p style="margin-bottom:8px;"><strong>' + (currentLang === 'sw' ? 'Mipango ya AI (' + aiPlans.length + '):' : 'AI Plans (' + aiPlans.length + '):') + '</strong></p>';
+
+  if(aiPlans.length){
+    html += '<ul style="padding-left:18px;">';
+    aiPlans.forEach(p => {
+      html += '<li style="margin-bottom:4px;color:var(--text-dark);font-size:13.5px;">' +
+        escapeHtml(p.topic) + ' — ' + escapeHtml(p.subject) + ' (' + escapeHtml(p.grade || '—') + ') · ' +
+        new Date(p.created_at).toLocaleDateString() + '</li>';
+    });
+    html += '</ul>';
+  } else {
+    html += '<p style="color:var(--text-soft);font-size:13px;">' + (currentLang === 'sw' ? 'Hakuna bado.' : 'None yet.') + '</p>';
+  }
+
+  content.innerHTML = html;
+}
+
+function closeAdminDetail(){
+  document.getElementById('adminDetailArea').style.display = 'none';
+}
+
+async function loadAdminList(){
+  const listEl = document.getElementById('adminList');
+  listEl.innerHTML = '<p style="color:#9fb3c8;font-size:12px;">Loading...</p>';
+  try{
+    const { data, error } = await sb.from('admins').select('email, scope').order('created_at');
+    if(error) throw error;
+    listEl.innerHTML = '';
+    (data || []).forEach(a => {
+      const row = document.createElement('div');
+      row.style.cssText = 'background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);' +
+        'border-radius:8px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;font-size:12.5px;';
+      row.innerHTML = '<span style="color:#e8eef3;">' + escapeHtml(a.email) + ' <span style="color:#9fb3c8;">(' +
+        (a.scope === 'global' ? (currentLang === 'sw' ? 'Wote' : 'Global') : escapeHtml(a.scope)) + ')</span></span>';
+      if(a.email !== CURRENT_EMAIL){
+        const delBtn = document.createElement('button');
+        delBtn.textContent = currentLang === 'sw' ? 'Ondoa' : 'Remove';
+        delBtn.style.cssText = 'background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;font-weight:600;';
+        delBtn.addEventListener('click', () => revokeAdmin(a.email));
+        row.appendChild(delBtn);
+      }
+      listEl.appendChild(row);
+    });
+  }catch(e){
+    console.error('loadAdminList error', e);
+    listEl.innerHTML = '<p style="color:#f0c9b7;font-size:12px;">Failed to load admins.</p>';
+  }
+}
+
+document.getElementById('newAdminScope') && document.getElementById('newAdminScope').addEventListener('change', function(){
+  document.getElementById('adminSchoolNameField').style.display = (this.value === 'school') ? 'block' : 'none';
+});
+
+async function grantAdmin(){
+  const errEl = document.getElementById('adminErr');
+  errEl.classList.remove('show'); errEl.textContent = '';
+
+  const email = document.getElementById('newAdminEmail').value.trim().toLowerCase();
+  const scopeType = document.getElementById('newAdminScope').value;
+  const schoolName = document.getElementById('newAdminSchoolName').value.trim();
+
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    errEl.textContent = currentLang === 'sw' ? 'Weka barua pepe sahihi.' : 'Please enter a valid email.';
+    errEl.classList.add('show');
+    return;
+  }
+  if(scopeType === 'school' && !schoolName){
+    errEl.textContent = currentLang === 'sw' ? 'Weka jina la shule.' : 'Please enter a school name.';
+    errEl.classList.add('show');
+    return;
+  }
+
+  const scope = scopeType === 'global' ? 'global' : schoolName;
+
+  try{
+    const { error } = await sb.from('admins').insert({ email, scope, granted_by: CURRENT_EMAIL });
+    if(error) throw error;
+    document.getElementById('newAdminEmail').value = '';
+    document.getElementById('newAdminSchoolName').value = '';
+    loadAdminList();
+  }catch(e){
+    errEl.textContent = (currentLang === 'sw' ? 'Imeshindwa: ' : 'Failed: ') + e.message;
+    errEl.classList.add('show');
+  }
+}
+
+async function revokeAdmin(email){
+  try{
+    await sb.from('admins').delete().eq('email', email);
+    loadAdminList();
+  }catch(e){ console.error('revokeAdmin error', e); }
 }
 
 </script>
