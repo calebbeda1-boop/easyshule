@@ -299,6 +299,15 @@
     color:#9aa2ad;border-top:1px solid var(--line);
   }
 
+  /* ===== Editable-field affordance (screen only, removed on print) ===== */
+  .sheet [contenteditable="true"]{ cursor:text; border-radius:3px; transition:background-color .12s ease; }
+  .sheet [contenteditable="true"]:hover{ background:#FBF6E8; outline:1px dashed #d8cca0; }
+  .sheet [contenteditable="true"]:focus{ background:#FFF9E9; outline:1.5px dashed var(--teal, #0B6E6E); outline-offset:1px; }
+  .sheet .edit-hint{
+    display:inline-block;margin:2px 22px 6px;font-size:9.5px;color:#9aa2ad;
+    font-family:'IBM Plex Mono',monospace;letter-spacing:.2px;
+  }
+
   @page{ size:A4; margin:8mm 10mm; }
   @media print{
     html,body{background:#fff;padding:0;margin:0;}
@@ -308,6 +317,8 @@
     .wrap{max-width:100%;margin:0;padding:0;}
     .section-label{break-inside:avoid;}
     table.acttable, table.introtable{break-inside:avoid;}
+    .sheet [contenteditable="true"]{ outline:none !important; background:transparent !important; }
+    .edit-hint{ display:none !important; }
   }
 </style>
 </head>
@@ -502,44 +513,45 @@
           </div>
         </div>
         <div class="form-title">LESSON PLAN</div>
+        <div class="edit-hint">✎ Tip: click any text below to edit it before printing.</div>
 
         <div class="form-grid">
           <table class="introtable">
             <tr>
-              <td class="lbl">School</td><td class="val" id="outSchool">—</td>
-              <td class="lbl">Teacher</td><td class="val" id="outTeacher">—</td>
+              <td class="lbl">School</td><td class="val" id="outSchool" contenteditable="true">—</td>
+              <td class="lbl">Teacher</td><td class="val" id="outTeacher" contenteditable="true">—</td>
             </tr>
             <tr>
-              <td class="lbl">Subject</td><td class="val" id="outSubject">—</td>
-              <td class="lbl">Class / Stream</td><td class="val" id="outClassStream">—</td>
+              <td class="lbl">Subject</td><td class="val" id="outSubject" contenteditable="true">—</td>
+              <td class="lbl">Class / Stream</td><td class="val" id="outClassStream" contenteditable="true">—</td>
             </tr>
             <tr>
-              <td class="lbl">Date</td><td class="val" id="outDate">—</td>
-              <td class="lbl">Day</td><td class="val" id="outDay">—</td>
+              <td class="lbl">Date</td><td class="val" id="outDate" contenteditable="true">—</td>
+              <td class="lbl">Day</td><td class="val" id="outDay" contenteditable="true">—</td>
             </tr>
             <tr>
-              <td class="lbl">Time</td><td class="val" id="outTime">—</td>
-              <td class="lbl">Period</td><td class="val" id="outPeriod">—</td>
+              <td class="lbl">Time</td><td class="val" id="outTime" contenteditable="true">—</td>
+              <td class="lbl">Period</td><td class="val" id="outPeriod" contenteditable="true">—</td>
             </tr>
             <tr>
-              <td class="lbl">Lesson Duration</td><td class="val" id="outDuration">—</td>
-              <td class="lbl">Term / Week</td><td class="val" id="outTermWeek">—</td>
+              <td class="lbl">Lesson Duration</td><td class="val" id="outDuration" contenteditable="true">—</td>
+              <td class="lbl">Term / Week</td><td class="val" id="outTermWeek" contenteditable="true">—</td>
             </tr>
             <tr>
-              <td class="lbl">Boys / Girls</td><td class="val" id="outBoysGirls">—</td>
-              <td class="lbl">Total</td><td class="val" id="outTotal">—</td>
+              <td class="lbl">Boys / Girls</td><td class="val" id="outBoysGirls" contenteditable="true">—</td>
+              <td class="lbl">Total</td><td class="val" id="outTotal" contenteditable="true">—</td>
             </tr>
             <tr>
-              <td class="lbl">Topic</td><td class="val" colspan="3" id="outTopic">—</td>
+              <td class="lbl">Topic</td><td class="val" colspan="3" id="outTopic" contenteditable="true">—</td>
             </tr>
             <tr>
-              <td class="lbl">Sub-topic</td><td class="val" colspan="3" id="outSubtopic">—</td>
+              <td class="lbl">Sub-topic</td><td class="val" colspan="3" id="outSubtopic" contenteditable="true">—</td>
             </tr>
           </table>
         </div>
 
         <p class="section-label">Broad Objective</p>
-        <p class="section-body" id="outBroad">—</p>
+        <p class="section-body editable" id="outBroad" contenteditable="true">—</p>
 
         <p class="section-label">Specific Objectives &amp; Success Criteria</p>
         <table class="acttable" id="objTable">
@@ -548,21 +560,21 @@
         </table>
 
         <p class="section-label">Teaching / Learning Aids</p>
-        <p class="section-body" id="outAids">—</p>
+        <p class="section-body editable" id="outAids" contenteditable="true">—</p>
 
         <p class="section-label">References</p>
-        <p class="section-body" id="outRefs">—</p>
+        <p class="section-body editable" id="outRefs" contenteditable="true">—</p>
 
         <p class="section-label">Introduction / Past Knowledge</p>
-        <p class="section-body" id="outIntro">—</p>
+        <p class="section-body editable" id="outIntro" contenteditable="true">—</p>
 
         <p class="section-label" style="margin-bottom:0;" id="actLabel">Teaching / Learning Activities (Total: 45 minutes)</p>
         <table class="acttable">
           <thead><tr><th style="width:15%;">Stage</th><th style="width:10%;">Time</th><th>Teacher's Activity</th><th>Students' Activity</th></tr></thead>
           <tbody>
-            <tr><td class="stage">Introduction<br>(Past Knowledge)</td><td class="time" id="timeIntro"></td><td class="ta" id="tIntro"></td><td class="la" id="lIntro"></td></tr>
-            <tr><td class="stage">Main Body</td><td class="time" id="timeMain"></td><td class="ta" id="tMain"></td><td class="la" id="lMain"></td></tr>
-            <tr><td class="stage">Conclusion</td><td class="time" id="timeConcl"></td><td class="ta" id="tConcl"></td><td class="la" id="lConcl"></td></tr>
+            <tr><td class="stage">Introduction<br>(Past Knowledge)</td><td class="time" id="timeIntro"></td><td class="ta editable" id="tIntro" contenteditable="true"></td><td class="la editable" id="lIntro" contenteditable="true"></td></tr>
+            <tr><td class="stage">Main Body</td><td class="time" id="timeMain"></td><td class="ta editable" id="tMain" contenteditable="true"></td><td class="la editable" id="lMain" contenteditable="true"></td></tr>
+            <tr><td class="stage">Conclusion</td><td class="time" id="timeConcl"></td><td class="ta editable" id="tConcl" contenteditable="true"></td><td class="la editable" id="lConcl" contenteditable="true"></td></tr>
           </tbody>
         </table>
 
@@ -570,7 +582,7 @@
         <div class="section-body"><ul id="outAssessment"></ul></div>
 
         <p class="section-label">Plenary</p>
-        <p class="section-body" id="outSummary">—</p>
+        <p class="section-body editable" id="outSummary" contenteditable="true">—</p>
 
         <div class="form-footer" id="outFooter">Generated automatically from the Yearly Academic Plan</div>
       </div>
@@ -644,20 +656,21 @@
             </div>
           </div>
           <div class="form-title">LESSON PLAN — AI GENERATED</div>
+          <div class="edit-hint">✎ Tip: click any text below to edit it before printing.</div>
 
           <div class="form-grid">
             <table class="introtable">
               <tr>
-                <td class="lbl">School</td><td class="val" id="aiOutSchool">—</td>
-                <td class="lbl">Teacher</td><td class="val" id="aiOutTeacher">—</td>
+                <td class="lbl">School</td><td class="val" id="aiOutSchool" contenteditable="true">—</td>
+                <td class="lbl">Teacher</td><td class="val" id="aiOutTeacher" contenteditable="true">—</td>
               </tr>
               <tr>
-                <td class="lbl">Subject</td><td class="val" id="aiOutSubject">—</td>
-                <td class="lbl">Class</td><td class="val" id="aiOutGrade">—</td>
+                <td class="lbl">Subject</td><td class="val" id="aiOutSubject" contenteditable="true">—</td>
+                <td class="lbl">Class</td><td class="val" id="aiOutGrade" contenteditable="true">—</td>
               </tr>
               <tr>
-                <td class="lbl">Topic</td><td class="val" id="aiOutTopic">—</td>
-                <td class="lbl">Duration</td><td class="val" id="aiOutDuration">—</td>
+                <td class="lbl">Topic</td><td class="val" id="aiOutTopic" contenteditable="true">—</td>
+                <td class="lbl">Duration</td><td class="val" id="aiOutDuration" contenteditable="true">—</td>
               </tr>
             </table>
 
@@ -665,10 +678,10 @@
             <div class="section-body"><ul id="aiOutObjectives"></ul></div>
 
             <p class="section-label">Teaching / Learning Aids</p>
-            <p class="section-body" id="aiOutAids">—</p>
+            <p class="section-body editable" id="aiOutAids" contenteditable="true">—</p>
 
             <p class="section-label">Introduction / Past Knowledge</p>
-            <p class="section-body" id="aiOutIntro">—</p>
+            <p class="section-body editable" id="aiOutIntro" contenteditable="true">—</p>
 
             <p class="section-label" style="margin-bottom:0;">Teaching / Learning Activities</p>
             <table class="acttable">
@@ -677,10 +690,10 @@
             </table>
 
             <p class="section-label">Assessment</p>
-            <p class="section-body" id="aiOutAssessment">—</p>
+            <p class="section-body editable" id="aiOutAssessment" contenteditable="true">—</p>
 
             <p class="section-label">Homework</p>
-            <p class="section-body" id="aiOutHomework">—</p>
+            <p class="section-body editable" id="aiOutHomework" contenteditable="true">—</p>
 
             <div class="form-footer">Generated by Easyshule AI Lesson Plan Generator</div>
           </div>
@@ -1424,9 +1437,45 @@ function previousRealTopic(classData, idx){
   }
   return null;
 }
-function guessAids(topicText){
+/* Base teaching/learning aids per subject. Matched by checking whether the
+   normalized subject name CONTAINS one of these keys, so "ICT/Computer Studies",
+   "Basic Science", "Biology", etc. all match sensibly. Order matters: more
+   specific keys should be listed before generic ones. */
+const SUBJECT_AID_BASE = [
+  [['ict','computer'], ['Computers / laptops','Projector or interactive whiteboard']],
+  [['kiswahili'], ['Kitabu cha kiada','Kamusi ya Kiswahili','Ubao na chaki/kalamu za ubao','Chati za lugha']],
+  [['english','kiingereza'], ['Course textbook','Dictionary','Flashcards','Whiteboard and markers']],
+  [['mathematics','math','hisabati'], ['Textbook','Mathematical set / ruler','Calculator','Whiteboard and markers']],
+  [['physics'], ['Textbook','Laboratory apparatus','Charts / diagrams','Whiteboard and markers']],
+  [['chemistry'], ['Textbook','Laboratory apparatus and chemicals','Charts / diagrams','Whiteboard and markers']],
+  [['biology'], ['Textbook','Specimens / models','Charts / diagrams','Whiteboard and markers']],
+  [['science'], ['Textbook','Laboratory apparatus (where applicable)','Charts / diagrams','Whiteboard and markers']],
+  [['geography'], ['Textbook','Maps / atlas','Globe','Charts and diagrams']],
+  [['history'], ['Textbook','Historical charts / timeline','Pictures / photographs']],
+  [['civics'], ['Textbook','Newspaper cuttings','Charts']],
+  [['business','commerce','economics'], ['Textbook','Case studies / business examples','Calculator','Charts']],
+  [['religio','bible','islamic','dini'], ['Textbook','Relevant scripture / religious text','Charts']],
+  [['physical education','sports','p.e'], ['Sports equipment','Whistle','Playground / field']],
+  [['art','fine art'], ['Drawing / art materials','Sample artworks','Charts']],
+  [['music'], ['Musical instruments','Audio player','Song sheets']],
+  [['french','kifaransa'], ['Course textbook','Dictionary','Flashcards','Whiteboard and markers']],
+];
+const DEFAULT_AID_BASE = ['Textbook','Exercise books','Whiteboard and markers'];
+
+function normSubj(s){ return String(s||'').toLowerCase(); }
+
+function guessAids(topicText, subject){
   const t = (topicText||'').toLowerCase();
-  const base = ['Computers / laptops','Projector or interactive whiteboard'];
+  const subj = normSubj(subject);
+
+  let base = DEFAULT_AID_BASE.slice();
+  for(const [keys, list] of SUBJECT_AID_BASE){
+    if(keys.some(k=>subj.includes(k))){ base = list.slice(); break; }
+  }
+
+  /* Extra ICT/tool-specific aids: only add these if the topic text actually
+     mentions the relevant software/tool, regardless of subject — harmless
+     for other subjects since these keywords won't normally appear there. */
   const map = [
     ['ms word', 'MS Word software'],
     ['excel', 'MS Excel software'],
@@ -1449,12 +1498,12 @@ function guessAids(topicText){
     ['artificial intelligence', 'AI demonstration videos / sample applications'],
     ['database', 'Database management software'],
     ['entreprene', 'Case studies / business examples'],
-    ['business', 'Case studies / business examples'],
     ['market', 'Sample product / market survey materials'],
   ];
   let extra = [];
   map.forEach(([k,v])=>{ if(t.includes(k) && !extra.includes(v)) extra.push(v); });
-  const aids = base.concat(extra, ['Printed worksheets / handouts']);
+
+  const aids = base.concat(extra.filter(x=>!base.includes(x)), ['Printed worksheets / handouts']);
   return aids.join(', ');
 }
 
@@ -1500,6 +1549,46 @@ function getSchedule(subject, cls, dateStr){
   return { dayName, found:true, period: entry.period || '—', time: timeStr || '—', duration: duration || 45 };
 }
 
+/* When a single Yearly-Plan row covers a whole week and the timetable shows
+   this subject+class meets more than once that week (e.g. Mon & Thu), the
+   list of activities for the week (split by ';') is distributed across those
+   lesson dates instead of repeating the full list on every lesson.
+   - If there's only one lesson in the week (or the timetable can't tell us),
+     all activities are kept together, same as before.
+   - If there are fewer/equal activities than lessons, each lesson gets one
+     activity in order (wrapping around if needed).
+   - If there are more activities than lessons, they are distributed evenly
+     (round-robin) across the lessons in the week. */
+function pickActivitiesForDay(activities, subject, cls, row, dateStr){
+  if(!activities || activities.length <= 1) return activities;
+  if(!dateStr || !row.start || !row.end || !TIMETABLE.length) return activities;
+
+  const weekDates = [];
+  let d = new Date(row.start+'T00:00:00');
+  const endD = new Date(row.end+'T00:00:00');
+  let guard = 0;
+  while(d <= endD && guard < 31){
+    const iso = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const dayName = DAY_NAMES[d.getDay()];
+    const has = TIMETABLE.some(r => normTxt(r.day)===normTxt(dayName) && sameClass(r.cls, cls) && sameSubject(r.subject, subject));
+    if(has) weekDates.push(iso);
+    d.setDate(d.getDate()+1);
+    guard++;
+  }
+
+  if(weekDates.length <= 1) return activities;
+
+  const idx = weekDates.indexOf(dateStr);
+  if(idx === -1) return activities;
+
+  if(activities.length <= weekDates.length){
+    const item = activities[idx % activities.length];
+    return item ? [item] : activities;
+  }
+  const bucket = activities.filter((_, i) => i % weekDates.length === idx);
+  return bucket.length ? bucket : activities;
+}
+
 function renderRow(row, subject, cls, classData, students, extras){
   document.getElementById('placeholder').style.display='none';
   document.getElementById('toolbar').classList.add('show');
@@ -1534,8 +1623,8 @@ function renderRow(row, subject, cls, classData, students, extras){
 
   const objBody = document.getElementById('outObjectives'); objBody.innerHTML='';
   const tr=document.createElement('tr');
-  const tdO=document.createElement('td'); tdO.textContent = mainObjective;
-  const tdS=document.createElement('td'); tdS.textContent = mainSuccess;
+  const tdO=document.createElement('td'); tdO.textContent = mainObjective; tdO.contentEditable='true'; tdO.classList.add('editable');
+  const tdS=document.createElement('td'); tdS.textContent = mainSuccess; tdS.contentEditable='true'; tdS.classList.add('editable');
   tr.appendChild(tdO); tr.appendChild(tdS); objBody.appendChild(tr);
 
   const duration = Number(extras.duration) || 45;
@@ -1546,7 +1635,7 @@ function renderRow(row, subject, cls, classData, students, extras){
   document.getElementById('timeMain').textContent = mainMin+' min';
   document.getElementById('timeConcl').textContent = conclMin+' min';
 
-  document.getElementById('outAids').textContent = guessAids(row.topic);
+  document.getElementById('outAids').textContent = guessAids(row.topic, subject);
   document.getElementById('outRefs').textContent = subject+' Scheme of Work — '+cls+'; '+CURRENT_PROFILE.school+' Yearly Academic Plan' + (row.topic && row.topic.match(/Ch\.\d+/) ? '; Course textbook, ' + row.topic.match(/Ch\.\d+[^\n]*/)[0] : '');
 
   const prevTopic = previousRealTopic(classData, row.idx);
@@ -1554,7 +1643,8 @@ function renderRow(row, subject, cls, classData, students, extras){
     ? 'Teacher briefly reviews the previous lesson on "'+prevTopic+'" through question and answer, then introduces today\'s topic: "'+mainTopic+'".'
     : 'Teacher introduces today\'s topic through a short discussion and questions to gauge learners\' existing knowledge of "'+mainTopic+'".';
 
-  const activities = splitList(row.activities).filter(a=>a!=='—');
+  const allActivities = splitList(row.activities).filter(a=>a!=='—');
+  const activities = pickActivitiesForDay(allActivities, subject, cls, row, extras.dateStr);
   const assessmentList = splitList(row.assessment);
 
   document.getElementById('tIntro').textContent = (prevTopic ? 'Reviews the previous lesson ("'+prevTopic+'") and links it to today\'s topic. ' : '') + 'Introduces the topic "'+mainTopic+'" and states the lesson objectives.';
@@ -1567,7 +1657,7 @@ function renderRow(row, subject, cls, classData, students, extras){
   document.getElementById('lConcl').textContent = 'Respond to the summary questions and complete the assessment task(s) given by the teacher.';
 
   const assUl = document.getElementById('outAssessment'); assUl.innerHTML='';
-  assessmentList.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; assUl.appendChild(li); });
+  assessmentList.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; li.contentEditable='true'; li.classList.add('editable'); assUl.appendChild(li); });
 
   document.getElementById('outSummary').textContent = 'Ask 2–3 students: "' + generalizeQuestion(mainObjective, mainTopic) + '" — if learners struggle to answer, revisit this point briefly at the start of the next lesson.';
 
@@ -1963,6 +2053,8 @@ function renderAIPlan(plan, meta){
   (plan.malengo || []).forEach(o => {
     const li = document.createElement('li');
     li.textContent = o;
+    li.contentEditable = 'true';
+    li.classList.add('editable');
     objList.appendChild(li);
   });
 
@@ -1975,7 +2067,7 @@ function renderAIPlan(plan, meta){
     const tr = document.createElement('tr');
     tr.innerHTML = '<td class="stage">' + escapeHtml(h.jina) + '</td>' +
                    '<td class="time">' + escapeHtml(h.muda) + '</td>' +
-                   '<td class="ta">' + escapeHtml(h.maelezo) + '</td>';
+                   '<td class="ta editable" contenteditable="true">' + escapeHtml(h.maelezo) + '</td>';
     stagesBody.appendChild(tr);
   });
 
