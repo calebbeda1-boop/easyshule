@@ -294,6 +294,14 @@
   table.acttable td.ta{width:43%;}
   table.acttable td.la{width:43%;}
 
+  table.reflect-table{width:calc(100% - 44px);margin:4px 22px 4px;border-collapse:collapse;font-size:11.5px;}
+  table.reflect-table td{border:1px solid var(--line);padding:5px 8px;vertical-align:top;line-height:1.42;}
+  table.reflect-table td.rq{font-weight:700;background:#F4F1E8;width:38%;color:var(--ink);}
+  table.reflect-table td.ra{width:62%;}
+  .addinfo-item{margin:0 22px 4px;font-size:12px;line-height:1.42;color:var(--text-dark);}
+  .addinfo-item b{color:var(--ink);}
+  .reflect-note{font-weight:400;text-transform:none;letter-spacing:0;font-size:9.5px;color:var(--text-soft);}
+
   .form-footer{
     text-align:center;padding:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;
     color:#9aa2ad;border-top:1px solid var(--line);
@@ -538,8 +546,8 @@
               <td class="lbl">Term / Week</td><td class="val" id="outTermWeek" contenteditable="true">—</td>
             </tr>
             <tr>
-              <td class="lbl">Boys / Girls</td><td class="val" id="outBoysGirls" contenteditable="true">—</td>
-              <td class="lbl">Total</td><td class="val" id="outTotal" contenteditable="true">—</td>
+              <td class="lbl">Number Present</td><td class="val editable" id="outPresent" contenteditable="true">—</td>
+              <td class="lbl">Number Absent</td><td class="val editable" id="outAbsent" contenteditable="true">—</td>
             </tr>
             <tr>
               <td class="lbl">Topic</td><td class="val" colspan="3" id="outTopic" contenteditable="true">—</td>
@@ -550,14 +558,17 @@
           </table>
         </div>
 
-        <p class="section-label">Broad Objective</p>
+        <p class="section-label">Learning Objective</p>
         <p class="section-body editable" id="outBroad" contenteditable="true">—</p>
 
-        <p class="section-label">Specific Objectives &amp; Success Criteria</p>
-        <table class="acttable" id="objTable">
-          <thead><tr><th style="width:45%;">Specific Objective</th><th style="width:55%;">Success Criteria</th></tr></thead>
-          <tbody id="outObjectives"></tbody>
-        </table>
+        <p class="section-label">Lesson Objectives</p>
+        <div class="section-body"><ul id="outObjectives"></ul></div>
+
+        <p class="section-label">Vocabulary <span class="reflect-note">(AI-suggested — edit as needed)</span></p>
+        <p class="section-body editable" id="outVocab" contenteditable="true">—</p>
+
+        <p class="section-label">Previous Learning</p>
+        <div class="section-body"><ul id="outPrevLearning"></ul></div>
 
         <p class="section-label">Teaching / Learning Aids</p>
         <p class="section-body editable" id="outAids" contenteditable="true">—</p>
@@ -565,24 +576,33 @@
         <p class="section-label">References</p>
         <p class="section-body editable" id="outRefs" contenteditable="true">—</p>
 
-        <p class="section-label">Introduction / Past Knowledge</p>
-        <p class="section-body editable" id="outIntro" contenteditable="true">—</p>
-
         <p class="section-label" style="margin-bottom:0;" id="actLabel">Teaching / Learning Activities (Total: 45 minutes)</p>
         <table class="acttable">
-          <thead><tr><th style="width:15%;">Stage</th><th style="width:10%;">Time</th><th>Teacher's Activity</th><th>Students' Activity</th></tr></thead>
+          <thead><tr><th style="width:13%;">Stage</th><th style="width:9%;">Time</th><th style="width:48%;">Activities</th><th style="width:30%;">Resources</th></tr></thead>
           <tbody>
-            <tr><td class="stage">Introduction<br>(Past Knowledge)</td><td class="time" id="timeIntro"></td><td class="ta editable" id="tIntro" contenteditable="true"></td><td class="la editable" id="lIntro" contenteditable="true"></td></tr>
-            <tr><td class="stage">Main Body</td><td class="time" id="timeMain"></td><td class="ta editable" id="tMain" contenteditable="true"></td><td class="la editable" id="lMain" contenteditable="true"></td></tr>
-            <tr><td class="stage">Conclusion</td><td class="time" id="timeConcl"></td><td class="ta editable" id="tConcl" contenteditable="true"></td><td class="la editable" id="lConcl" contenteditable="true"></td></tr>
+            <tr><td class="stage">Beginning</td><td class="time" id="timeBeg"></td><td class="ta editable" id="tBeg" contenteditable="true"></td><td class="la editable" id="rBeg" contenteditable="true"></td></tr>
+            <tr><td class="stage">Middle</td><td class="time" id="timeMid"></td><td class="ta editable" id="tMid" contenteditable="true"></td><td class="la editable" id="rMid" contenteditable="true"></td></tr>
+            <tr><td class="stage">End</td><td class="time" id="timeEnd"></td><td class="ta editable" id="tEnd" contenteditable="true"></td><td class="la editable" id="rEnd" contenteditable="true"></td></tr>
           </tbody>
         </table>
 
-        <p class="section-label">Assessment</p>
-        <div class="section-body"><ul id="outAssessment"></ul></div>
+        <p class="section-label">Additional Information</p>
+        <p class="addinfo-item"><b>Differentiation:</b> <span class="editable" id="outDiff" contenteditable="true">—</span></p>
+        <p class="addinfo-item"><b>Assessment:</b> <span class="editable" id="outAssessText" contenteditable="true">—</span></p>
+        <p class="addinfo-item"><b>H&amp;S / ICT:</b> <span class="editable" id="outHS" contenteditable="true">—</span></p>
 
-        <p class="section-label">Plenary</p>
-        <p class="section-body editable" id="outSummary" contenteditable="true">—</p>
+        <p class="section-label">Reflection &amp; Evaluation <span class="reflect-note">(complete after teaching — AI-suggested draft below)</span></p>
+        <table class="reflect-table">
+          <tr><td class="rq">Were the lesson objectives realistic?</td><td class="ra editable" id="rfObjectives" contenteditable="true">—</td></tr>
+          <tr><td class="rq">What did the learners learn today?</td><td class="ra editable" id="rfLearned" contenteditable="true">—</td></tr>
+          <tr><td class="rq">What was the learning atmosphere like?</td><td class="ra editable" id="rfAtmosphere" contenteditable="true">—</td></tr>
+          <tr><td class="rq">Did my planned differentiation work well?</td><td class="ra editable" id="rfDiffWork" contenteditable="true">—</td></tr>
+          <tr><td class="rq">Did I stick to timings?</td><td class="ra editable" id="rfTimings" contenteditable="true">—</td></tr>
+          <tr><td class="rq">What changes did I make from my plan and why?</td><td class="ra editable" id="rfChanges" contenteditable="true">—</td></tr>
+          <tr><td class="rq">What two things went really well?</td><td class="ra editable" id="rfWentWell" contenteditable="true">—</td></tr>
+          <tr><td class="rq">What two things would have improved the lesson?</td><td class="ra editable" id="rfImprove" contenteditable="true">—</td></tr>
+          <tr><td class="rq">What have I learned about the class/individuals that will inform my next lesson?</td><td class="ra editable" id="rfNextLesson" contenteditable="true">—</td></tr>
+        </table>
 
         <div class="form-footer" id="outFooter">Generated automatically from the Yearly Academic Plan</div>
       </div>
@@ -1507,6 +1527,25 @@ function guessAids(topicText, subject){
   return aids.join(', ');
 }
 
+/* Lightweight heuristic vocabulary extractor: pulls likely domain-specific
+   terms (longer, non-common words) out of the topic/sub-topic/objectives
+   text so the Vocabulary section starts with a reasonable draft that the
+   teacher can edit. Not a dictionary lookup — just a starting point. */
+const VOCAB_STOP = new Set(['about','after','apply','applying','because','before','being','both','confidently','could','describe','describes','during','each','every','explain','explains','from','have','knowledge','learn','learners','learner','learning','lesson','lessons','might','other','review','shall','should','skill','skills','some','student','students','such','than','that','their','then','these','this','those','through','topic','topics','understand','using','were','what','when','where','which','while','with','would']);
+function guessVocabulary(topicText, subTopicText, objectivesText){
+  const raw = [topicText, subTopicText, objectivesText].filter(Boolean).join(' ');
+  const words = raw.split(/[^A-Za-z]+/).filter(Boolean);
+  const seen = new Set();
+  const out = [];
+  words.forEach(w=>{
+    const lw = w.toLowerCase();
+    if(lw.length < 5 || VOCAB_STOP.has(lw) || seen.has(lw)) return;
+    seen.add(lw);
+    out.push(lw);
+  });
+  return out.slice(0, 8).join(', ') || '—';
+}
+
 const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 function to12h(hhmm){
   const parts = String(hhmm).split(':').map(Number);
@@ -1606,8 +1645,13 @@ function renderRow(row, subject, cls, classData, students, extras){
   document.getElementById('outTime').textContent = extras.time || '—';
   document.getElementById('outDuration').textContent = extras.duration ? extras.duration+' minutes' : '45 minutes (default)';
   const boysN = Number(extras.boys)||0, girlsN = Number(extras.girls)||0;
-  document.getElementById('outBoysGirls').textContent = (extras.boys || extras.girls) ? (extras.boys||'0')+' / '+(extras.girls||'0') : '—';
-  document.getElementById('outTotal').textContent = students || ((boysN+girlsN) || '—');
+  const totalN = students || ((boysN+girlsN) || null);
+  /* Number Present / Number Absent: attendance is taken on the day, so it can't
+     be known in advance. Pre-fill Present with the expected class size as a
+     sensible starting point (editable), and Absent with 0 — the teacher
+     overwrites both after taking the register. */
+  document.getElementById('outPresent').textContent = totalN ? String(totalN) : '—';
+  document.getElementById('outAbsent').textContent = totalN ? '0' : '—';
   const termClean = (row.term||'—').split('-')[0].trim() || '—';
   const weekClean = (row.week||'—').split(':')[0].trim() || '—';
   document.getElementById('outTermWeek').textContent = termClean + ' / ' + weekClean;
@@ -1615,63 +1659,71 @@ function renderRow(row, subject, cls, classData, students, extras){
   document.getElementById('outTopic').textContent = mainTopic;
   document.getElementById('outSubtopic').textContent = subTopic;
 
-  const objectivesList = splitList(row.objectives);
-  const successList = splitList(row.success);
+  const objectivesList = splitList(row.objectives).filter(a=>a!=='—');
+  const successList = splitList(row.success).filter(a=>a!=='—');
   const mainObjective = objectivesList[0] || '—';
-  const mainSuccess = successList[0] || '—';
-  document.getElementById('outBroad').textContent = 'By the end of this lesson, the student should have a clear understanding of "' + mainTopic.replace(/^Ch\.\d+\s*[–-]\s*/,'') + '" and be able to apply the related skills confidently.';
+  const cleanTopic = mainTopic.replace(/^Ch\.\d+\s*[–-]\s*/,'');
+  document.getElementById('outBroad').textContent = 'By the end of this lesson, the student should have a clear understanding of "' + cleanTopic + '" and be able to apply the related skills confidently.';
 
-  const objBody = document.getElementById('outObjectives'); objBody.innerHTML='';
-  const tr=document.createElement('tr');
-  const tdO=document.createElement('td'); tdO.textContent = mainObjective; tdO.contentEditable='true'; tdO.classList.add('editable');
-  const tdS=document.createElement('td'); tdS.textContent = mainSuccess; tdS.contentEditable='true'; tdS.classList.add('editable');
-  tr.appendChild(tdO); tr.appendChild(tdS); objBody.appendChild(tr);
+  const objUl = document.getElementById('outObjectives'); objUl.innerHTML='';
+  const objSource = objectivesList.length ? objectivesList : ['Understand and apply the key ideas of "'+cleanTopic+'".'];
+  objSource.forEach((obj,i)=>{
+    const li=document.createElement('li'); li.contentEditable='true'; li.classList.add('editable');
+    li.textContent = obj + (successList[i] ? '  (Success criterion: '+successList[i]+')' : '');
+    objUl.appendChild(li);
+  });
+
+  document.getElementById('outVocab').textContent = guessVocabulary(mainTopic, subTopic, objectivesList.join(' '));
+
+  const prevTopic = previousRealTopic(classData, row.idx);
+  const prevUl = document.getElementById('outPrevLearning'); prevUl.innerHTML='';
+  const prevItems = [];
+  if(prevTopic) prevItems.push('Learners have prior knowledge of "'+prevTopic+'" from the previous lesson.');
+  prevItems.push('Basic literacy and numeracy skills appropriate to '+subject+' at this level.');
+  prevItems.forEach(t=>{ const li=document.createElement('li'); li.contentEditable='true'; li.classList.add('editable'); li.textContent=t; prevUl.appendChild(li); });
 
   const duration = Number(extras.duration) || 45;
   const introMin = 5, conclMin = 10;
   const mainMin = Math.max(duration - introMin - conclMin, 5);
   document.getElementById('actLabel').textContent = 'Teaching / Learning Activities (Total: '+duration+' minutes)';
-  document.getElementById('timeIntro').textContent = introMin+' min';
-  document.getElementById('timeMain').textContent = mainMin+' min';
-  document.getElementById('timeConcl').textContent = conclMin+' min';
+  document.getElementById('timeBeg').textContent = introMin+' min';
+  document.getElementById('timeMid').textContent = mainMin+' min';
+  document.getElementById('timeEnd').textContent = conclMin+' min';
 
-  document.getElementById('outAids').textContent = guessAids(row.topic, subject);
+  const aidsText = guessAids(row.topic, subject);
+  document.getElementById('outAids').textContent = aidsText;
   document.getElementById('outRefs').textContent = subject+' Scheme of Work — '+cls+'; '+CURRENT_PROFILE.school+' Yearly Academic Plan' + (row.topic && row.topic.match(/Ch\.\d+/) ? '; Course textbook, ' + row.topic.match(/Ch\.\d+[^\n]*/)[0] : '');
-
-  const prevTopic = previousRealTopic(classData, row.idx);
-  document.getElementById('outIntro').textContent = prevTopic
-    ? 'Teacher briefly reviews the previous lesson on "'+prevTopic+'" through question and answer, then introduces today\'s topic: "'+mainTopic+'".'
-    : 'Teacher introduces today\'s topic through a short discussion and questions to gauge learners\' existing knowledge of "'+mainTopic+'".';
 
   const allActivities = splitList(row.activities).filter(a=>a!=='—');
   const activities = pickActivitiesForDay(allActivities, subject, cls, row, extras.dateStr);
-  const assessmentList = splitList(row.assessment);
+  const assessmentList = splitList(row.assessment).filter(a=>a!=='—');
 
-  document.getElementById('tIntro').textContent = (prevTopic ? 'Reviews the previous lesson ("'+prevTopic+'") and links it to today\'s topic. ' : '') + 'Introduces the topic "'+mainTopic+'" and states the lesson objectives.';
-  document.getElementById('lIntro').textContent = 'Listen attentively, recall previous knowledge, and respond to the teacher\'s introductory questions.';
+  document.getElementById('tBeg').textContent = (prevTopic ? 'Whole-class discussion reviewing the previous lesson ("'+prevTopic+'"). ' : 'Whole-class discussion to introduce today\'s topic. ') + 'Teacher introduces "'+mainTopic+'" and states the lesson objectives; learners listen, recall prior knowledge, and respond to introductory questions.';
+  document.getElementById('rBeg').textContent = 'Class discussion — no resources';
 
-  document.getElementById('tMain').textContent = 'Guides and facilitates the following activities: ' + (activities.length ? activities.join('; ') + '.' : 'Explains the topic step by step and demonstrates the required skills.');
-  document.getElementById('lMain').textContent = 'Participate actively in the activities above, practise the skills individually or in pairs/groups, and ask questions where necessary.';
+  document.getElementById('tMid').textContent = (activities.length ? activities.join('; ')+'.' : 'Teacher explains the topic step by step and demonstrates the required skills.') + ' Learners practise individually or in pairs/groups and ask questions where necessary.';
+  document.getElementById('rMid').textContent = aidsText;
 
-  document.getElementById('tConcl').textContent = 'Summarises the key points of the lesson and conducts assessment: ' + (assessmentList.length ? assessmentList.join('; ') + '.' : 'oral questions and observation.');
-  document.getElementById('lConcl').textContent = 'Respond to the summary questions and complete the assessment task(s) given by the teacher.';
+  document.getElementById('tEnd').textContent = 'Summarises the key points of the lesson and conducts assessment: ' + (assessmentList.length ? assessmentList.join('; ')+'.' : 'oral questions and observation.') + ' Learners respond to summary questions and complete the assessment task(s) given.';
+  document.getElementById('rEnd').textContent = 'Learners\' completed work / exercise books';
 
-  const assUl = document.getElementById('outAssessment'); assUl.innerHTML='';
-  assessmentList.forEach(t=>{ const li=document.createElement('li'); li.textContent=t; li.contentEditable='true'; li.classList.add('editable'); assUl.appendChild(li); });
+  document.getElementById('outDiff').textContent = 'Support — provide simplified instructions and a worked example for learners who need more guidance. Extension — challenge learners who finish early with a related, more demanding task or question about "'+cleanTopic+'".';
+  document.getElementById('outAssessText').textContent = assessmentList.length ? assessmentList.join('; ')+'.' : 'Oral questioning and observation during the lesson; review of learners\' work.';
+  document.getElementById('outHS').textContent = /ict|computer/i.test(subject)
+    ? 'Follow standard screen-time and posture guidance when using computers/tablets for this lesson.'
+    : 'Ensure the classroom/activity area is safe and appropriate for the planned activities.';
 
-  document.getElementById('outSummary').textContent = 'Ask 2–3 students: "' + generalizeQuestion(mainObjective, mainTopic) + '" — if learners struggle to answer, revisit this point briefly at the start of the next lesson.';
+  document.getElementById('rfObjectives').textContent = 'Likely yes — the objectives are specific to "'+cleanTopic+'" and achievable within the '+duration+' minutes allocated.';
+  document.getElementById('rfLearned').textContent = objSource.length ? 'Learners are expected to be able to: ' + objSource.join('; ') + '.' : 'To be completed after the lesson.';
+  document.getElementById('rfAtmosphere').textContent = 'Expected to be engaged and participative, especially during the Middle-stage activities.';
+  document.getElementById('rfDiffWork').textContent = 'Likely yes — monitor learners closely during the Middle stage to confirm the Support and Extension strategies are meeting their needs.';
+  document.getElementById('rfTimings').textContent = 'Likely yes, provided the Beginning stage is kept brief so the Middle stage keeps its full '+mainMin+' minutes.';
+  document.getElementById('rfChanges').textContent = 'No major changes anticipated; adjust pacing if learners need more practice time.';
+  document.getElementById('rfWentWell').textContent = '1. Clear introduction linking to prior learning. 2. Hands-on/practical activities during the Middle stage.';
+  document.getElementById('rfImprove').textContent = '1. More time for individual practice. 2. Additional examples for learners who find the topic challenging.';
+  document.getElementById('rfNextLesson').textContent = 'Monitor which learners need extra support with "'+cleanTopic+'" and adjust the next lesson\'s pace and grouping accordingly.';
 
   sheet.scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-function generalizeQuestion(objective, topic){
-  if(!objective || objective==='—'){
-    return 'In your own words, what is one new thing you learned about "'+topic+'" today?';
-  }
-  let q = objective.trim();
-  q = q.charAt(0).toLowerCase() + q.slice(1);
-  q = q.replace(/[.;]+$/, '');
-  return 'Can you show or explain how to ' + q + '?';
 }
 
 document.getElementById('fallbackSelect').addEventListener('change', function(){
