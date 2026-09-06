@@ -1,0 +1,10 @@
+{
+  "name": "y10-data-rep-exam",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Al Muntazir Y10 Data Representation baseline test — self-contained exam + Vercel API for centralised results and a topic/subtopic resource-upload system.",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4"
+  }
+}

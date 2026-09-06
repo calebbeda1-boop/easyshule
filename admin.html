@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>ICT Ground | Admin</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+
+<style>
+:root{
+  --void:#050505; --violet:#8b5cf6; --cyan:#06b6d4; --green:#39ff8c; --gold:#e8c468;
+  --white:#fff; --dim:rgba(255,255,255,.6); --faint:rgba(255,255,255,.34);
+  --card:rgba(255,255,255,.035); --border:rgba(255,255,255,.1);
+  --ease:cubic-bezier(.16,1,.3,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--void);color:var(--white);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.mono{font-family:'JetBrains Mono',monospace}
+
+.aura{position:fixed;inset:-25%;z-index:0;pointer-events:none;
+  background:radial-gradient(circle at 50% 40%, rgba(232,196,104,.14), rgba(58,28,92,.35) 30%, transparent 65%);
+  animation:drift 22s ease-in-out infinite alternate}
+@keyframes drift{from{transform:translate3d(-2%,-1%,0) scale(1)}to{transform:translate3d(2%,3%,0) scale(1.12)}}
+
+.brand-name{color:var(--green);text-shadow:0 0 10px rgba(57,255,140,.6),0 0 22px rgba(57,255,140,.25)}
+::selection{background:rgba(139,92,246,.45);color:#fff}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:var(--void)}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--violet),var(--cyan));border-radius:10px;box-shadow:0 0 10px rgba(6,182,212,.6)}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+
+/* ============ LOGIN GATE ============ */
+#gate{
+  position:relative;z-index:2;max-width:380px;margin:12vh auto;padding:38px 32px;border-radius:18px;
+  background:#0b0d14;border:1px solid rgba(232,196,104,.25);
+  box-shadow:0 30px 70px rgba(0,0,0,.6),0 0 60px rgba(139,92,246,.12),0 0 30px rgba(232,196,104,.08);
+}
+#gate .crown{font-size:2rem;text-align:center;margin-bottom:6px;filter:drop-shadow(0 0 12px rgba(232,196,104,.6))}
+#gate .eyebrow{text-align:center;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:3px;color:var(--gold);margin-bottom:18px}
+#gate h2{font-size:1.3rem;text-align:center;margin-bottom:22px;font-weight:700}
+#gate input{
+  width:100%;padding:13px 14px;border:1px solid var(--border);border-radius:10px;font-size:.95rem;
+  margin-bottom:12px;background:rgba(255,255,255,.04);color:#fff;font-family:'Space Grotesk',sans-serif;
+  transition:border-color .3s ease,box-shadow .3s ease;
+}
+#gate input:focus{border-color:rgba(232,196,104,.6);box-shadow:0 0 18px rgba(232,196,104,.2);outline:none}
+#gate button{
+  width:100%;padding:13px;border:none;border-radius:10px;color:#0b0d14;font-weight:700;cursor:pointer;font-size:.92rem;
+  background:linear-gradient(120deg,var(--gold),var(--cyan));transition:transform .15s ease,box-shadow .3s ease;
+}
+#gate button:hover,#gate button:active{box-shadow:0 0 30px rgba(232,196,104,.4),0 0 50px rgba(6,182,212,.25);transform:translateY(-1px)}
+#gate .err{color:#ff6b6b;font-size:.82rem;margin-top:10px;text-align:center;display:none}
+
+/* ============ DASHBOARD SHELL ============ */
+#dash{display:none;position:relative;z-index:2}
+.topbar{
+  position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+  padding:18px clamp(18px,4vw,44px);background:rgba(5,5,5,.75);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);
+}
+.logo{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;letter-spacing:3px}
+.btn-ghost{
+  font:600 12px/1 'JetBrains Mono',monospace;letter-spacing:1px;color:var(--dim);text-transform:uppercase;
+  background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:20px;padding:9px 18px;cursor:pointer;
+  transition:color .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+.btn-ghost:hover,.btn-ghost:active{color:#fff;border-color:rgba(255,255,255,.35);box-shadow:0 0 16px rgba(255,255,255,.1)}
+
+main{max-width:1180px;margin:0 auto;padding:28px clamp(16px,4vw,32px) 60px}
+
+/* Tabs */
+.tabs{display:flex;gap:8px;margin-bottom:26px;padding:5px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;width:fit-content;max-width:100%;overflow-x:auto}
+.tab-btn{
+  font:700 12px/1 'JetBrains Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);
+  background:none;border:none;border-radius:10px;padding:12px 20px;cursor:pointer;white-space:nowrap;
+  transition:color .25s ease,background .25s ease,box-shadow .25s ease;
+}
+.tab-btn.active{color:#0b0d14;background:linear-gradient(120deg,var(--gold),var(--violet));box-shadow:0 0 24px rgba(139,92,246,.35)}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeUp .35s var(--ease)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* Stat cards */
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;transition:box-shadow .25s ease,border-color .25s ease}
+.stat:hover{border-color:rgba(232,196,104,.35);box-shadow:0 0 26px rgba(232,196,104,.12)}
+.stat .n{font-size:1.7rem;font-weight:700;background:linear-gradient(120deg,var(--gold),var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .l{font-size:.74rem;color:var(--dim);margin-top:2px}
+
+/* Toolbar */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.toolbar input[type=text]{
+  flex:1;min-width:180px;padding:11px 14px;border:1px solid var(--border);border-radius:10px;font-size:.88rem;
+  background:rgba(255,255,255,.04);color:#fff;font-family:'Space Grotesk',sans-serif;
+}
+.toolbar input[type=text]:focus{border-color:rgba(6,182,212,.5);outline:none;box-shadow:0 0 14px rgba(6,182,212,.15)}
+.btn{
+  padding:11px 18px;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:.8rem;
+  font-family:'JetBrains Mono',monospace;letter-spacing:.5px;color:#0b0d14;background:linear-gradient(120deg,var(--cyan),var(--violet));
+  transition:transform .15s ease,box-shadow .25s ease;
+}
+.btn:hover,.btn:active{box-shadow:0 0 22px rgba(6,182,212,.35);transform:translateY(-1px)}
+.btn.secondary{background:rgba(255,255,255,.07);color:var(--dim)}
+.btn.secondary:hover,.btn.secondary:active{color:#fff}
+.btn.danger{background:rgba(220,38,38,.12);color:#ff8787;border:1px solid rgba(220,38,38,.3)}
+.btn.danger:hover,.btn.danger:active{box-shadow:0 0 18px rgba(220,38,38,.3)}
+
+/* Tables */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th,td{padding:12px 14px;text-align:left;font-size:.84rem;border-bottom:1px solid var(--border);white-space:nowrap}
+th{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);cursor:pointer;background:rgba(255,255,255,.03)}
+th:hover{color:#fff}
+tbody tr{transition:background .15s ease}
+tbody tr:hover{background:rgba(255,255,255,.035)}
+.grade-pill{display:inline-block;padding:3px 11px;border-radius:20px;font-weight:700;font-size:.72rem;font-family:'JetBrains Mono',monospace}
+.g-A{background:rgba(57,255,140,.12);color:var(--green)} .g-B{background:rgba(6,182,212,.14);color:var(--cyan)}
+.g-C{background:rgba(232,196,104,.15);color:var(--gold)} .g-D,.g-E,.g-F{background:rgba(220,38,38,.14);color:#ff8787}
+.flag{color:#ff8787;font-weight:700}
+.type-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:.68rem;font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,.06);color:var(--dim)}
+.empty{text-align:center;padding:50px 20px;color:var(--faint);font-size:.9rem}
+.pdf-link{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;
+  background:linear-gradient(120deg,var(--cyan),var(--violet));color:#0b0d14;
+  font:700 .74rem/1 'JetBrains Mono',monospace;text-decoration:none;transition:transform .15s ease,box-shadow .2s ease;
+}
+.pdf-link:hover,.pdf-link:active{box-shadow:0 0 18px rgba(6,182,212,.4);transform:translateY(-1px)}
+.pdf-missing{color:var(--faint);font-size:.78rem;font-style:italic}
+
+/* Upload card */
+.upload-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px clamp(18px,4vw,30px);margin-bottom:26px}
+.upload-card h3{font-size:1.05rem;margin-bottom:18px;font-weight:600}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media (max-width:560px){.form-row{grid-template-columns:1fr}}
+.field label{display:block;font:700 10px/1 'JetBrains Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
+.field select,.field input[type=text],.field input[type=url]{
+  width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font-size:.9rem;
+  background:rgba(255,255,255,.04);color:#fff;font-family:'Space Grotesk',sans-serif;
+}
+.field select:focus,.field input:focus{border-color:rgba(6,182,212,.5);outline:none}
+.field select{appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2306b6d4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center;padding-right:34px}
+
+.type-toggle{display:flex;gap:8px;margin-bottom:16px}
+.type-toggle button{
+  flex:1;padding:11px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.03);color:var(--dim);
+  font:700 12px/1 'JetBrains Mono',monospace;letter-spacing:1px;cursor:pointer;transition:all .2s ease;
+}
+.type-toggle button.active{color:#0b0d14;background:linear-gradient(120deg,var(--green),var(--cyan));border-color:transparent;box-shadow:0 0 20px rgba(57,255,140,.25)}
+
+.dropzone{
+  border:1.5px dashed rgba(255,255,255,.2);border-radius:12px;padding:34px 20px;text-align:center;cursor:pointer;
+  transition:border-color .25s ease,box-shadow .25s ease,background .25s ease;background:rgba(255,255,255,.015);
+}
+.dropzone.drag,.dropzone:hover{border-color:rgba(6,182,212,.5);box-shadow:0 0 26px rgba(6,182,212,.12);background:rgba(6,182,212,.03)}
+.dropzone .dz-icon{font-size:1.8rem;margin-bottom:8px}
+.dropzone .dz-main{font-size:.92rem;font-weight:600}
+.dropzone .dz-sub{font-size:.76rem;color:var(--faint);margin-top:6px}
+.dropzone input[type=file]{display:none}
+.file-chip{
+  display:inline-flex;align-items:center;gap:10px;margin-top:12px;padding:9px 14px;border-radius:10px;
+  background:rgba(57,255,140,.08);border:1px solid rgba(57,255,140,.25);font-size:.82rem;color:var(--green);
+}
+
+.progress-wrap{margin-top:14px;height:6px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden;display:none}
+.progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--cyan),var(--violet));background-size:200% 100%;animation:sweep 1.4s linear infinite;transition:width .2s ease}
+@keyframes sweep{from{background-position:0% 0}to{background-position:200% 0}}
+
+.upload-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+.msg{font-size:.82rem;margin-top:12px;display:none}
+.msg.ok{color:var(--green)} .msg.err{color:#ff8787}
+
+/* Footer — mirrors index.html */
+.footer{position:relative;z-index:2;border-top:1px solid var(--border);padding:44px clamp(20px,6vw,64px) 60px;display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}
+.footer .credit{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--faint)}
+.founder-card{display:flex;align-items:center;gap:16px}
+.founder-avatar{width:56px;height:56px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid rgba(255,255,255,.15);
+  box-shadow:0 0 0 1px rgba(139,92,246,.25),0 0 22px rgba(57,255,140,.35);}
+.founder-avatar img{width:100%;height:100%;object-fit:cover;object-position:top center}
+.founder-text{display:flex;flex-direction:column;text-align:left}
+.founder-text small{font:600 .62rem/1 'JetBrains Mono',monospace;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+.founder-text b{font-size:.95rem}
+.founder-text span{font-size:.75rem;color:var(--dim);display:block}
+
+@media (max-width:480px){
+  #gate{margin:16vh 18px;padding:30px 22px}
+  .founder-card{flex-direction:column;text-align:center}
+  .founder-text{align-items:center;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div class="aura"></div>
+
+<!-- ============ LOGIN GATE ============ -->
+<div id="gate">
+  <div class="crown">👑</div>
+  <div class="eyebrow">ICT GROUND // ADMIN</div>
+  <h2>Ingia kusimamia</h2>
+  <input type="password" id="pw" placeholder="Admin password" autocomplete="off" onkeydown="if(event.key==='Enter') login()">
+  <button onclick="login()">Ingia</button>
+  <div class="err" id="gate-err">Password si sahihi.</div>
+</div>
+
+<!-- ============ DASHBOARD ============ -->
+<div id="dash">
+  <header class="topbar">
+    <div class="logo">ICT GROUND <span class="brand-name">// ADMIN</span></div>
+    <button class="btn-ghost" onclick="logout()">Toka</button>
+  </header>
+
+  <main>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="results" onclick="switchTab('results')">Matokeo</button>
+      <button class="tab-btn" data-tab="pdfs" onclick="switchTab('pdfs')">PDF za Mitihani</button>
+      <button class="tab-btn" data-tab="upload" onclick="switchTab('upload')">Pandisha Mitihani</button>
+    </div>
+
+    <!-- ===== TAB: RESULTS (existing dashboard, restyled) ===== -->
+    <section id="tab-results" class="tab-panel active">
+      <div class="summary" id="summary"></div>
+      <div class="toolbar">
+        <input type="text" id="search" placeholder="Tafuta jina, campus au darasa..." oninput="renderResults()">
+        <button class="btn secondary" onclick="loadResults()">↻ Onyesha upya</button>
+        <button class="btn" onclick="exportCsv()">⬇ Pakua CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table id="tbl">
+          <thead>
+            <tr>
+              <th onclick="sortBy('name')">Jina</th>
+              <th onclick="sortBy('cand')">Campus/Wing</th>
+              <th onclick="sortBy('cls')">Darasa</th>
+              <th onclick="sortBy('totalCorrect')">Alama</th>
+              <th onclick="sortBy('pct')">%</th>
+              <th onclick="sortBy('grade')">Daraja</th>
+              <th onclick="sortBy('penaltyMarks')">Adhabu</th>
+              <th onclick="sortBy('tabSwitchCount')">Tab-switch</th>
+              <th onclick="sortBy('submittedAt')">Wakati</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="empty" style="display:none">Hakuna matokeo bado.</div>
+    </section>
+
+    <!-- ===== TAB: MARKED-PAPER PDFs ===== -->
+    <section id="tab-pdfs" class="tab-panel">
+      <div class="toolbar">
+        <input type="text" id="pdf-search" placeholder="Tafuta jina, campus au darasa..." oninput="renderPdfs()">
+        <button class="btn secondary" onclick="loadResults()">↻ Onyesha upya</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Jina</th><th>Campus/Wing</th><th>Darasa</th><th>Alama</th><th>Daraja</th><th>PDF</th></tr>
+          </thead>
+          <tbody id="pdf-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="pdf-empty" style="display:none">Hakuna PDF bado.</div>
+    </section>
+
+    <!-- ===== TAB: UPLOAD SUBTOPICS ===== -->
+    <section id="tab-upload" class="tab-panel">
+      <div class="upload-card">
+        <h3>Pandisha mtihani / rasilimali mpya</h3>
+
+        <div class="form-row">
+          <div class="field">
+            <label>Topic</label>
+            <select id="f-topic"></select>
+          </div>
+          <div class="field">
+            <label>Jina la Subtopic</label>
+            <input type="text" id="f-title" placeholder="mf. Number Systems">
+          </div>
+        </div>
+
+        <div class="type-toggle">
+          <button type="button" class="active" id="btn-type-file" onclick="setContentType('file')">📁 Pakia Faili</button>
+          <button type="button" id="btn-type-link" onclick="setContentType('link')">🔗 Weka Link</button>
+        </div>
+
+        <div id="file-block">
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('f-file').click()">
+            <div class="dz-icon">⬆️</div>
+            <div class="dz-main">Bofya au buruta faili hapa</div>
+            <div class="dz-sub">Excel, Word, PDF, picha, video, HTML — faili yoyote muhimu</div>
+            <input type="file" id="f-file"
+              accept=".xlsx,.xls,.csv,.doc,.docx,.pdf,.png,.jpg,.jpeg,.gif,.webp,.mp4,.mov,.webm,.html,.htm,.zip,.ppt,.pptx">
+          </div>
+          <div id="file-chip-wrap"></div>
+        </div>
+
+        <div id="link-block" style="display:none">
+          <div class="field">
+            <label>Kiungo (Google Sheet, Scratch, au link nyingine)</label>
+            <input type="url" id="f-link" placeholder="https://...">
+          </div>
+        </div>
+
+        <div class="progress-wrap" id="progressWrap"><div class="progress-bar" id="progressBar"></div></div>
+        <div class="msg" id="uploadMsg"></div>
+
+        <div class="upload-actions">
+          <button class="btn" id="btn-submit" onclick="submitUpload()">Pandisha</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Topic</th><th>Jina</th><th>Aina</th><th>Kiungo</th><th>Tarehe</th><th></th></tr>
+          </thead>
+          <tbody id="subtopicsBody"></tbody>
+        </table>
+      </div>
+      <div class="empty" id="subtopicsEmpty" style="display:none">Bado hujapandisha chochote.</div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="logo"><span>ICT GROUND <span class="brand-name">// ALMIIS</span></span></div>
+    <div class="credit"><span class="brand-name">ALMIIS</span> — Computer Science for Year 10 &amp; 11, ready for IGCSE</div>
+    <div class="founder-card">
+      <div class="founder-avatar"><img src="assets/orbital/images/bedaphoto.png" alt="Beda Issaya Msoffe"></div>
+      <div class="founder-text">
+        <small>Designed by</small>
+        <b>BEDA ISSAYA MSOFFE</b>
+        <span>TEACHER &amp;TechSol</span>
+        <span class="brand-name">ICT GROUND</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   FILL THESE IN — safe to expose in the browser (public/anon key,
+   protected by RLS + signed upload URLs, not the secret service key)
+   ============================================================ */
+const SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR-ANON-PUBLIC-KEY';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* Must match the topics/ids used in index.html's TOPICS array */
+const TOPICS = [
+  { id:1, label:'DATA REPRESENTATION' }, { id:2, label:'DATA TRANSMISSION' },
+  { id:3, label:'HARDWARE' }, { id:4, label:'SOFTWARE' }, { id:5, label:'THE INTERNET' },
+  { id:6, label:'EMERGING TECHNOLOGIES' }, { id:7, label:'ALGORITHMS' },
+  { id:8, label:'PROGRAMMING' }, { id:9, label:'DATABASES' }, { id:10, label:'BOOLEAN LOGIC' }
+];
+document.getElementById('f-topic').innerHTML = TOPICS.map(t => `<option value="${t.id}">${t.label}</option>`).join('');
+
+/* ============ AUTH GATE (same password pattern as before) ============ */
+function login(){
+  const pw = document.getElementById('pw').value;
+  sessionStorage.setItem('admin_pw', pw);
+  loadResults();
+  loadSubtopics();
+}
+function logout(){
+  sessionStorage.removeItem('admin_pw');
+  document.getElementById('dash').style.display='none';
+  document.getElementById('gate').style.display='block';
+}
+function authHeaders(){
+  return { 'x-admin-password': sessionStorage.getItem('admin_pw') || '' };
+}
+function showDash(){
+  document.getElementById('gate').style.display='none';
+  document.getElementById('dash').style.display='block';
+}
+function showGateError(){
+  document.getElementById('gate-err').style.display='block';
+  document.getElementById('gate').style.display='block';
+  document.getElementById('dash').style.display='none';
+}
+
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab===name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id==='tab-'+name));
+}
+
+/* ============ RESULTS TAB (existing /api/results, restyled) ============ */
+let DATA = [];
+let sortKey = 'submittedAt', sortDir = -1;
+
+async function loadResults(){
+  try{
+    const res = await fetch('/api/results', { headers: authHeaders() });
+    if(res.status === 401){ showGateError(); return; }
+    const data = await res.json();
+    DATA = data.submissions || [];
+    showDash();
+    renderSummary();
+    renderResults();
+    renderPdfs();
+  }catch(e){ console.error(e); }
+}
+function renderSummary(){
+  const n = DATA.length;
+  const avg = n ? Math.round(DATA.reduce((a,d)=>a+d.pct,0)/n) : 0;
+  const flagged = DATA.filter(d=>d.tabSwitchCount>=3).length;
+  document.getElementById('summary').innerHTML = `
+    <div class="stat"><div class="n">${n}</div><div class="l">Wamewasilisha</div></div>
+    <div class="stat"><div class="n">${avg}%</div><div class="l">Wastani wa darasa</div></div>
+    <div class="stat"><div class="n">${flagged}</div><div class="l">Waliobadili tab ≥3</div></div>
+  `;
+}
+function sortBy(key){ sortDir = (sortKey===key) ? -sortDir : 1; sortKey = key; renderResults(); }
+function renderResults(){
+  const q = (document.getElementById('search').value||'').toLowerCase();
+  let rows = DATA.filter(d => !q || (d.name||'').toLowerCase().includes(q) || (d.cand||'').toLowerCase().includes(q) || (d.cls||'').toLowerCase().includes(q));
+  rows.sort((a,b)=>{ const va=a[sortKey], vb=b[sortKey]; if(typeof va==='string') return sortDir*va.localeCompare(vb); return sortDir*((va||0)-(vb||0)); });
+  const tbody = document.getElementById('tbody');
+  document.getElementById('empty').style.display = rows.length ? 'none':'block';
+  tbody.innerHTML = rows.map(d=>`
+    <tr>
+      <td>${esc(d.name)}</td><td>${esc(d.cand)}</td><td>${esc(d.cls)}</td>
+      <td>${d.totalCorrect}/${d.totalMarks}</td><td>${d.pct}%</td>
+      <td><span class="grade-pill g-${esc(d.grade)}">${esc(d.grade)}</span></td>
+      <td>${d.penaltyMarks||0}</td>
+      <td>${d.tabSwitchCount>=3?'<span class="flag">'+d.tabSwitchCount+'</span>':d.tabSwitchCount}</td>
+      <td>${new Date(d.submittedAt).toLocaleString('en-GB')}</td>
+    </tr>`).join('');
+}
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function renderPdfs(){
+  const q = (document.getElementById('pdf-search').value||'').toLowerCase();
+  let rows = DATA.filter(d => !q || (d.name||'').toLowerCase().includes(q) || (d.cand||'').toLowerCase().includes(q) || (d.cls||'').toLowerCase().includes(q));
+  const tbody = document.getElementById('pdf-tbody');
+  document.getElementById('pdf-empty').style.display = rows.length ? 'none':'block';
+  tbody.innerHTML = rows.map(d=>`
+    <tr>
+      <td>${esc(d.name)}</td><td>${esc(d.cand)}</td><td>${esc(d.cls)}</td>
+      <td>${d.totalCorrect}/${d.totalMarks}</td>
+      <td><span class="grade-pill g-${esc(d.grade)}">${esc(d.grade)}</span></td>
+      <td>${d.pdfUrl ? `<a class="pdf-link" href="${esc(d.pdfUrl)}" target="_blank" rel="noopener">📄 Fungua PDF</a>` : '<span class="pdf-missing">Haipo</span>'}</td>
+    </tr>`).join('');
+}
+function exportCsv(){
+  const headers = ['Name','Campus','Class','Score','Total','Percent','Grade','Penalty','TabSwitches','SubmittedAt'];
+  const lines = [headers.join(',')];
+  DATA.forEach(d=>{
+    lines.push([d.name,d.cand,d.cls,d.totalCorrect,d.totalMarks,d.pct,d.grade,d.penaltyMarks||0,d.tabSwitchCount,new Date(d.submittedAt).toISOString()]
+      .map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(','));
+  });
+  const blob = new Blob([lines.join('\n')], {type:'text/csv'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'data_rep_results.csv'; a.click();
+}
+
+/* ============ UPLOAD TAB ============ */
+let contentType = 'file';
+let pickedFile = null;
+
+function setContentType(t){
+  contentType = t;
+  document.getElementById('btn-type-file').classList.toggle('active', t==='file');
+  document.getElementById('btn-type-link').classList.toggle('active', t==='link');
+  document.getElementById('file-block').style.display = t==='file' ? 'block' : 'none';
+  document.getElementById('link-block').style.display = t==='link' ? 'block' : 'none';
+}
+
+const dz = document.getElementById('dropzone');
+const fileInput = document.getElementById('f-file');
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+['dragover','dragenter'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('drag'); }));
+['dragleave','drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('drag'); }));
+dz.addEventListener('drop', e => { if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+
+function handleFile(file){
+  if(!file) return;
+  pickedFile = file;
+  const kb = (file.size/1024).toFixed(0);
+  document.getElementById('file-chip-wrap').innerHTML =
+    `<div class="file-chip">📎 ${esc(file.name)} <span class="mono" style="opacity:.7">(${kb} KB)</span></div>`;
+}
+
+function fileExt(name){ const m = /\.([a-z0-9]+)$/i.exec(name||''); return m ? m[1].toLowerCase() : ''; }
+
+async function submitUpload(){
+  const msg = document.getElementById('uploadMsg');
+  msg.style.display='none';
+  const topicId = parseInt(document.getElementById('f-topic').value, 10);
+  const title = document.getElementById('f-title').value.trim();
+  if(!title){ return showMsg('Weka jina la subtopic kwanza.', 'err'); }
+
+  let url, type, ext = null;
+
+  if(contentType === 'link'){
+    url = document.getElementById('f-link').value.trim();
+    if(!url){ return showMsg('Weka link kwanza.', 'err'); }
+    type = 'link';
+  } else {
+    if(!pickedFile){ return showMsg('Chagua faili kwanza.', 'err'); }
+    type = 'file';
+    ext = fileExt(pickedFile.name);
+    try{
+      url = await uploadFileToStorage(pickedFile, topicId);
+    }catch(e){
+      console.error(e);
+      return showMsg('Imeshindikana kupakia faili: ' + e.message, 'err');
+    }
+  }
+
+  try{
+    const res = await fetch('/api/subtopics', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', ...authHeaders() },
+      body: JSON.stringify({ topic_id: topicId, title, content_type: type, file_ext: ext, url })
+    });
+    if(res.status === 401) return showGateError();
+    if(!res.ok) throw new Error('Server error');
+    showMsg('Imepandishwa! Itaonekana kwenye site kuu papo hapo.', 'ok');
+    document.getElementById('f-title').value = '';
+    document.getElementById('f-link').value = '';
+    pickedFile = null;
+    document.getElementById('file-chip-wrap').innerHTML = '';
+    loadSubtopics();
+  }catch(e){
+    console.error(e);
+    showMsg('Imeshindikana kuhifadhi taarifa. ' + e.message, 'err');
+  }
+}
+
+async function uploadFileToStorage(file, topicId){
+  const progressWrap = document.getElementById('progressWrap');
+  const progressBar = document.getElementById('progressBar');
+  progressWrap.style.display='block'; progressBar.style.width='30%';
+
+  // 1. ask our server (which holds the secret service key) for a one-time signed upload slot
+  const path = `topic-${topicId}/${Date.now()}-${file.name}`.replace(/\s+/g,'-');
+  const res = await fetch('/api/upload-url', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', ...authHeaders() },
+    body: JSON.stringify({ path })
+  });
+  if(res.status === 401){ progressWrap.style.display='none'; throw new Error('Password si sahihi'); }
+  const { token, bucket, publicUrl } = await res.json();
+  progressBar.style.width='65%';
+
+  // 2. upload straight to Supabase Storage using that signed token (bypasses server body-size limits)
+  const { error } = await sb.storage.from(bucket).uploadToSignedUrl(path, token, file);
+  progressBar.style.width='100%';
+  setTimeout(()=>{ progressWrap.style.display='none'; progressBar.style.width='0%'; }, 500);
+  if(error) throw error;
+  return publicUrl;
+}
+
+function showMsg(text, kind){
+  const msg = document.getElementById('uploadMsg');
+  msg.textContent = text; msg.className = 'msg ' + kind; msg.style.display='block';
+}
+
+async function loadSubtopics(){
+  try{
+    const res = await fetch('/api/subtopics', { headers: authHeaders() });
+    if(res.status === 401) return;
+    const data = await res.json();
+    renderSubtopics(data.subtopics || []);
+  }catch(e){ console.error(e); }
+}
+function renderSubtopics(rows){
+  const tbody = document.getElementById('subtopicsBody');
+  document.getElementById('subtopicsEmpty').style.display = rows.length ? 'none' : 'block';
+  tbody.innerHTML = rows.map(r => {
+    const topic = TOPICS.find(t => t.id === r.topic_id);
+    const typeLabel = r.content_type === 'link' ? '🔗 Link' : '📁 ' + (r.file_ext || 'faili').toUpperCase();
+    return `<tr>
+      <td>${esc(topic ? topic.label : r.topic_id)}</td>
+      <td>${esc(r.title)}</td>
+      <td><span class="type-pill">${typeLabel}</span></td>
+      <td><a href="${r.url}" target="_blank" class="mono" style="color:var(--cyan)">Fungua ↗</a></td>
+      <td class="mono" style="font-size:.72rem;color:var(--faint)">${new Date(r.created_at).toLocaleDateString('en-GB')}</td>
+      <td><button class="btn danger" style="padding:6px 12px;font-size:.68rem" onclick="deleteSubtopic('${r.id}')">Futa</button></td>
+    </tr>`;
+  }).join('');
+}
+async function deleteSubtopic(id){
+  if(!confirm('Una uhakika unataka kufuta hii?')) return;
+  const res = await fetch('/api/subtopics?id=' + encodeURIComponent(id), { method:'DELETE', headers: authHeaders() });
+  if(res.status === 401) return showGateError();
+  loadSubtopics();
+}
+
+if(sessionStorage.getItem('admin_pw')){ loadResults(); loadSubtopics(); }
+</script>
+</body>
+</html>
