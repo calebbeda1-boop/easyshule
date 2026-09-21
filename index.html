@@ -1,534 +1,132 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sw">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#050505">
-<title>ICT Ground | ALMIIS Computer Science</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/orbital/tooplate-2167-orbital-style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tovuti Inajengwa</title>
 <style>
-  .panel-locked .panel-face--text .p-label::after{
-    content:'SOON'; font-size:.6rem; letter-spacing:1.5px; color:#8892a6;
-    border:1px solid #3a4256; border-radius:20px; padding:2px 8px; margin-left:8px; vertical-align:middle;
-  }
-  .panel-locked .panel-cap::after{ content:' · SOON'; opacity:.7; font-size:.7em; }
-  .assess-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:18px; margin-top:36px}
-  .assess-card{
-    background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:14px;
-    padding:24px; text-decoration:none; display:block; position:relative; overflow:hidden;
-    transition:transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
-  }
-  .assess-card::before{
-    content:''; position:absolute; inset:0; border-radius:inherit; padding:1px; pointer-events:none;
-    background:linear-gradient(135deg, rgba(139,92,246,.55), rgba(6,182,212,.35));
-    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite:xor; mask-composite:exclude; opacity:0; transition:opacity .25s ease;
-  }
-  .assess-card:hover, .assess-card:active{
-    transform:translateY(-3px); border-color:rgba(120,170,255,.4); background:rgba(255,255,255,.055);
-    box-shadow:0 0 30px rgba(120,170,255,.22), 0 0 60px rgba(139,92,246,.12);
-  }
-  .assess-card:hover::before, .assess-card:active::before{ opacity:1; }
-  @media (hover:none){ .assess-card:active{ transform:translateY(-1px) scale(.98); } }
-  .assess-subject{ font:600 .68rem/1 'JetBrains Mono',monospace; letter-spacing:1.5px; text-transform:uppercase; color:#8fb3ff; margin-bottom:10px; }
-  .assess-card h3{ font-family:'Space Grotesk',sans-serif; font-size:1.15rem; color:#f2f4fa; margin-bottom:8px; }
-  .assess-card p{ font-family:'Space Grotesk',sans-serif; font-size:.85rem; color:#a7afc2; line-height:1.55; margin-bottom:16px; }
-  .assess-cta{ font:700 .72rem/1 'JetBrains Mono',monospace; letter-spacing:1px; color:#8fb3ff; }
-  .staff-login{
-    position:fixed; bottom:max(20px, env(safe-area-inset-bottom)); right:max(20px, env(safe-area-inset-right)); z-index:50;
-    font:600 .72rem/1 'JetBrains Mono',monospace; letter-spacing:1px; text-transform:uppercase;
-    color:#a7afc2; text-decoration:none; border:1px solid rgba(255,255,255,.15); border-radius:20px;
-    padding:10px 18px; background:rgba(10,12,20,.5); backdrop-filter:blur(6px);
-    transition:color .25s ease, border-color .25s ease, box-shadow .25s ease, transform .15s ease;
-  }
-  .staff-login:hover, .staff-login:active{
-    color:#fff; border-color:rgba(143,179,255,.6);
-    box-shadow:0 0 18px rgba(143,179,255,.35), 0 0 34px rgba(139,92,246,.2);
-  }
-  @media (hover:none){ .staff-login:active{ transform:scale(.96); } }
-
-  .footer-grid{display:flex; justify-content:center; grid-template-columns:1fr; padding-top:0; padding-bottom:28px; border-top:1px solid rgba(255,255,255,.08); margin-top:-6px;}
-  .founder-card{display:flex; align-items:center; gap:16px; padding-top:24px;}
-  .founder-avatar{
-    width:56px; height:56px; border-radius:50%; overflow:hidden; flex-shrink:0;
-    border:2px solid rgba(255,255,255,.15); background:rgba(255,255,255,.05);
-    box-shadow:0 0 0 1px rgba(139,92,246,.25), 0 0 22px rgba(57,255,140,.35);
-    transition:box-shadow .4s ease, border-color .4s ease, transform .3s ease;
-  }
-  .founder-card:hover .founder-avatar, .founder-card:active .founder-avatar{
-    border-color:rgba(57,255,140,.6);
-    box-shadow:0 0 0 1px rgba(57,255,140,.5), 0 0 34px rgba(57,255,140,.5), 0 0 50px rgba(139,92,246,.25);
-    transform:scale(1.04);
-  }
-  .founder-avatar img{width:100%; height:100%; object-fit:cover; object-position:top center; border-radius:50%;}
-  .founder-text{display:flex; flex-direction:column; text-align:left;}
-  .founder-text small{font:600 .62rem/1 'JetBrains Mono',monospace; letter-spacing:1.5px; text-transform:uppercase; color:#8fb3ff; margin-bottom:4px;}
-  .founder-text b{font-family:'Space Grotesk',sans-serif; font-size:.95rem; color:#f2f4fa;}
-  .founder-text span{font-family:'Space Grotesk',sans-serif; font-size:.75rem; color:#a7afc2; display:block;}
-
-  /* ============ TOUCH / HOVER GLOW ON RING PANELS ============ */
-  .panel{ cursor:pointer; }
-  .panel .panel-glow{
-    position:absolute; inset:0; border-radius:inherit; pointer-events:none; z-index:5;
-    opacity:0; transition:opacity .35s ease;
-    background:radial-gradient(140px circle at var(--gx,50%) var(--gy,50%), rgba(143,179,255,.65), rgba(143,179,255,.12) 45%, transparent 70%);
-    mix-blend-mode:screen;
-  }
-  .panel.is-glowing .panel-glow{ opacity:1; }
-  .panel.is-glowing{
-    box-shadow:0 0 0 1px rgba(143,179,255,.55), 0 0 26px 4px rgba(143,179,255,.35);
-  }
-  .panel-locked.is-glowing{
-    box-shadow:0 0 0 1px rgba(167,175,194,.4), 0 0 18px 2px rgba(167,175,194,.22);
-  }
-  @media (prefers-reduced-motion: reduce){
-    .panel .panel-glow{ transition:none; }
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
 
-  /* ============ TOPIC → SUBTOPIC MODAL ============ */
-  .topic-modal-overlay{
-    position:fixed; inset:0; z-index:300; display:none; align-items:center; justify-content:center;
-    padding:20px; background:rgba(5,6,12,.72); backdrop-filter:blur(4px);
-  }
-  .topic-modal-overlay.show{ display:flex; }
-  @keyframes modalUp{ from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);} }
-  .topic-modal{
-    width:100%; max-width:560px; max-height:min(82vh, 720px); overflow-y:auto; border-radius:16px;
-    background:#0e1119; border:1px solid rgba(143,179,255,.22);
-    box-shadow:0 30px 70px rgba(0,0,0,.55), 0 0 50px rgba(143,179,255,.16), 0 0 90px rgba(139,92,246,.08);
-    animation:modalUp .25s ease;
-  }
-  .topic-modal-head{
-    position:sticky; top:0; background:linear-gradient(150deg, rgba(143,179,255,.14), rgba(14,17,25,.9) 70%);
-    padding:22px 24px; display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
-    border-bottom:1px solid rgba(255,255,255,.08);
-  }
-  .topic-modal-head .p-num{ font:600 .7rem/1 'JetBrains Mono',monospace; color:#8fb3ff; letter-spacing:1.5px; margin-bottom:6px; }
-  .topic-modal-head h3{ font-family:'Space Grotesk',sans-serif; font-size:1.25rem; color:#f2f4fa; }
-  .topic-modal-head span{ font-family:'Space Grotesk',sans-serif; font-size:.8rem; color:#a7afc2; display:block; margin-top:4px; }
-  .topic-modal-close{
-    position:relative; width:36px; height:36px; flex-shrink:0; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    background:rgba(255,255,255,.06); color:#f2f4fa; font-size:16px; line-height:1; border:1px solid rgba(255,255,255,.1);
-    transition:background .2s ease, box-shadow .2s ease, transform .15s ease; cursor:pointer;
-  }
-  .topic-modal-close::before{ content:''; position:absolute; inset:-8px; }
-  .topic-modal-close:hover, .topic-modal-close:active{ background:rgba(255,255,255,.14); box-shadow:0 0 16px rgba(143,179,255,.3); }
-  @media (hover:none){ .topic-modal-close:active{ transform:scale(.9); } }
-  .topic-modal-body{ padding:18px 24px 26px; display:flex; flex-direction:column; gap:12px; }
-  .subtopic-link{
-    display:flex; align-items:center; justify-content:space-between; gap:14px;
-    padding:16px 18px; border-radius:12px; text-decoration:none;
-    background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08);
-    transition:transform .15s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
-  }
-  .subtopic-link:hover, .subtopic-link:active{
-    transform:translateX(3px); border-color:rgba(143,179,255,.45); background:rgba(255,255,255,.055);
-    box-shadow:0 0 22px rgba(143,179,255,.18);
-  }
-  @media (hover:none){ .subtopic-link:active{ transform:translateX(1px) scale(.99); } }
-  .subtopic-link .st-info b{ font-family:'Space Grotesk',sans-serif; font-size:.95rem; color:#f2f4fa; display:block; margin-bottom:4px; }
-  .subtopic-link .st-info small{ font-family:'Space Grotesk',sans-serif; font-size:.78rem; color:#a7afc2; line-height:1.5; }
-  .subtopic-link .st-go{ font:700 .68rem/1 'JetBrains Mono',monospace; letter-spacing:1px; color:#8fb3ff; white-space:nowrap; }
-  .topic-modal-soon{
-    padding:26px 4px 6px; text-align:center; font-family:'Space Grotesk',sans-serif; color:#a7afc2; font-size:.9rem; line-height:1.6;
+  html, body {
+    height: 100%;
   }
 
-  @media (max-width: 480px){
-    .assess-grid{ grid-template-columns:1fr; gap:14px; }
-    .topic-modal-overlay{ padding:0; align-items:flex-end; }
-    .topic-modal{ max-width:100%; max-height:88vh; border-radius:20px 20px 0 0; animation:modalUpSheet .25s ease; }
-    .topic-modal-head{ padding:20px 18px; }
-    .topic-modal-body{ padding:16px 18px 22px; }
-    .founder-card{ flex-direction:column; text-align:center; }
-    .founder-text{ align-items:center; text-align:center; }
-    .staff-login{ padding:9px 14px; font-size:.65rem; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
   }
-  @keyframes modalUpSheet{ from{opacity:0; transform:translateY(40px);} to{opacity:1; transform:translateY(0);} }
+
+  .container {
+    max-width: 600px;
+  }
+
+  .icon {
+    font-size: 5rem;
+    margin-bottom: 20px;
+    animation: spin 4s linear infinite;
+    display: inline-block;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  h1 {
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: #d1d9e0;
+    margin-bottom: 30px;
+    line-height: 1.6;
+  }
+
+  .progress-bar {
+    width: 100%;
+    background: rgba(255,255,255,0.15);
+    border-radius: 30px;
+    overflow: hidden;
+    height: 14px;
+    margin-bottom: 30px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 65%;
+    background: linear-gradient(90deg, #00c9ff, #92fe9d);
+    border-radius: 30px;
+  }
+
+  .social {
+    margin-bottom: 40px;
+  }
+
+  .social a {
+    color: #fff;
+    text-decoration: none;
+    margin: 0 10px;
+    font-size: 0.95rem;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: 0.3s;
+  }
+
+  .social a:hover {
+    background: rgba(255,255,255,0.15);
+  }
+
+  footer {
+    position: fixed;
+    bottom: 15px;
+    width: 100%;
+    text-align: center;
+    font-size: 0.9rem;
+    color: rgba(255,255,255,0.6);
+  }
+
+  footer span {
+    color: #92fe9d;
+    font-weight: 600;
+  }
 </style>
 </head>
+<body>
 
-<body class="visuals-on">
+  <div class="container">
+    <div class="icon">⚙️</div>
+    <h1>Tovuti Inajengwa</h1>
+    <p>Samahani kwa usumbufu. Tunafanya kazi kwa bidii kukuletea tovuti nzuri zaidi. Tafadhali rudi hapa baadaye!</p>
 
-<div class="aura"></div>
-<div class="stars"></div>
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
 
-<nav class="nav">
-  <div class="logo"><a href="#" class="logo">ICT GROUND <span>// ALMIIS</span></a></div>
-  <ul class="nav-links">
-    <li><a href="#system">System</a></li>
-    <li><a href="#assessments">Assessments</a></li>
-  </ul>
-  <button class="menu-toggle" aria-label="Open menu" aria-expanded="false">
-    <span></span><span></span><span></span>
-  </button>
-</nav>
-
-<div class="mobile-menu">
-  <a href="#system">System</a>
-  <a href="#assessments">Assessments</a>
-</div>
-
-<header class="hero">
-  <div class="stage">
-    <div class="parallax">
-      <div class="ring-tilt">
-        <div class="ring" id="ring">
-          <!-- panels are rendered by renderRingPanels() below, from the TOPICS array -->
-        </div>
-      </div>
-      <div class="hero-text">
-        <div class="eyebrow">ICT GROUND</div>
-        <h1>COMPUTER SCIENCE</h1>
-        <p>For Year 10 and Year 11 — ready for IGCSE. A project by the ICT Department, <span class="brand-name">Al Muntazir Islamic International School (ALMIIS)</span>.</p>
-      </div>
+    <div class="social">
+      <a href="#">Facebook</a>
+      <a href="#">Instagram</a>
+      <a href="https://wa.link/avtcpe">WhatsApp</a>
     </div>
   </div>
-  <div class="hero-controls">
-    <div class="ctrl">
-      <span class="ctrl-label">VISUALS</span>
-      <button class="switch" id="visualsSwitch" role="switch" aria-checked="true" aria-label="Toggle image visuals">
-        <span class="knob"></span>
-      </button>
-    </div>
-    <div class="ctrl">
-      <span class="ctrl-label">ZOOM</span>
-      <button class="switch" id="zoomSwitch" role="switch" aria-checked="false" aria-label="Zoom ring 24 percent larger">
-        <span class="knob"></span>
-      </button>
-    </div>
-    <div class="ctrl">
-      <span class="ctrl-label">SPACING</span>
-      <div class="spacing" role="group" aria-label="Ring spacing">
-        <button class="spacing-step" data-space="0" aria-label="Tight spacing"><i></i></button>
-        <button class="spacing-step is-active" data-space="1" aria-label="Default spacing"><i></i></button>
-        <button class="spacing-step" data-space="2" aria-label="Wide spacing"><i></i></button>
-      </div>
-    </div>
-  </div>
-  <div class="scroll-cue">
-    <span>SCROLL</span>
-    <div class="line"></div>
-  </div>
-</header>
 
-<section class="section" id="system">
-  <div class="section-head reveal">
-    <div class="eyebrow">// THE SYSTEM</div>
-    <h2>One place for every ICT assessment.</h2>
-    <p>ICT Ground hosts every Computer Science assessment for Year 10 and 11 (IGCSE) — auto-marked on submission, with results and marked papers collected in one dashboard for staff.</p>
-  </div>
-  <div class="features">
-    <div class="feature reveal">
-      <div class="f-index">01 // AUTO-MARK</div>
-      <h3>Instant grading</h3>
-      <p>Every test is marked the moment a student submits — no manual marking, no delay.</p>
-    </div>
-    <div class="feature reveal">
-      <div class="f-index">02 // OFFLINE-SAFE</div>
-      <h3>Works without WiFi</h3>
-      <p>Answers are saved on-device as students work, so a dropped connection never loses a result.</p>
-    </div>
-    <div class="feature reveal">
-      <div class="f-index">03 // CENTRALISED</div>
-      <h3>One results dashboard</h3>
-      <p>Every submission, score and marked paper lands in a single staff-only panel — sortable, searchable, exportable.</p>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="assessments">
-  <div class="section-head reveal">
-    <div class="eyebrow">// ASSESSMENTS</div>
-    <h2>Available now</h2>
-    <p>More topics are added here as they're built.</p>
-  </div>
-  <div class="assess-grid" id="assess-grid"></div>
-</section>
-
-<footer class="footer">
-  <div class="logo"><a href="#" class="logo">ICT GROUND <span>// ALMIIS</span></a></div>
-  <div class="credit"><span class="brand-name">ALMIIS</span> — Computer Science for Year 10 &amp; 11, ready for IGCSE</div>
-
-  <div class="footer-grid">
-    <div class="founder-card">
-      <div class="founder-avatar">
-        <img src="assets/orbital/images/bedaphoto.png" alt="Beda Issaya Msoffe">
-      </div>
-      <div class="founder-text">
-        <small>Designed by</small>
-        <b>BEDA ISSAYA MSOFFE</b>
-        <span>TEACHER &amp;TechSol</span>
-        <span class="brand-name">ICT GROUND</span>
-      </div>
-    </div>
-  </div>
-</footer>
-
-<a class="staff-login" href="/admin.html">Staff Login</a>
-
-<!-- ============ TOPIC → SUBTOPIC MODAL ============ -->
-<div class="topic-modal-overlay" id="topicModalOverlay" onclick="if(event.target===this) closeTopicModal()">
-  <div class="topic-modal">
-    <div class="topic-modal-head">
-      <div>
-        <div class="p-num" id="topicModalNum">01</div>
-        <h3 id="topicModalTitle">Data Representation</h3>
-        <span id="topicModalSub">3 subtopics</span>
-      </div>
-      <button class="topic-modal-close" onclick="closeTopicModal()" aria-label="Close">&times;</button>
-    </div>
-    <div class="topic-modal-body" id="topicModalBody"></div>
-  </div>
-</div>
-
-<script>
-/* ============================================================
-   TOPICS: one entry per ring panel. Edit `subtopics[].url` to
-   point at each subtopic's real assessment page once it exists.
-   `locked:false` = clickable now, `locked:true` = shows "coming soon".
-   ============================================================ */
-const TOPICS = [
-  { id:1, label:'DATA REPRESENTATION', img:'image-01.png', locked:false,
-    subtopics:[
-      { t:'Number Systems',       url:'/exams/data-representation-number-systems.html' },
-      { t:'Text, Sound & Images', url:'/exams/data-representation-text-sound-images.html' },
-      { t:'Compression',          url:'/exams/data-representation-compression.html' }
-    ]
-  },
-  { id:2, label:'DATA TRANSMISSION', img:'image-02.png', locked:false,
-    subtopics:[
-      { t:'Transmission Methods', url:'/exams/data-transmission-methods.html' },
-      { t:'Error Detection',      url:'/exams/data-transmission-error-detection.html' },
-      { t:'Encryption',           url:'/exams/data-transmission-encryption.html' }
-    ]
-  },
-  { id:3, label:'HARDWARE', img:'image-03.png', locked:false,
-    subtopics:[
-      { t:'Computer Architecture',  url:'/exams/hardware-computer-architecture.html' },
-      { t:'Input & Output Devices', url:'/exams/hardware-input-output-devices.html' },
-      { t:'Sensors',                url:'/exams/hardware-sensors.html' },
-      { t:'Storage',                url:'/exams/hardware-storage.html' },
-      { t:'Network Concepts',       url:'/exams/hardware-network-concepts.html' }
-    ]
-  },
-  { id:4, label:'SOFTWARE', img:'image-04.png', locked:false,
-    subtopics:[
-      { t:'System & Application Software', url:'/exams/software-system-application.html' },
-      { t:'Operating Systems & Interrupts', url:'/exams/software-os-interrupts.html' },
-      { t:'Programming Languages',         url:'/exams/software-programming-languages.html' },
-      { t:'Translators',                   url:'/exams/software-translators.html' },
-      { t:'IDEs',                          url:'/exams/software-ides.html' }
-    ]
-  },
-  { id:5, label:'THE INTERNET', img:'image-05.png', locked:false,
-    subtopics:[
-      { t:'Internet & WWW',   url:'/exams/internet-www.html' },
-      { t:'Digital Currency', url:'/exams/internet-digital-currency.html' },
-      { t:'Cyber Security',   url:'/exams/internet-cyber-security.html' }
-    ]
-  },
-  { id:6, label:'EMERGING TECHNOLOGIES', img:'image-06.png', locked:false,
-    subtopics:[
-      { t:'Automated Systems',       url:'/exams/emerging-automated-systems.html' },
-      { t:'Robotics',                url:'/exams/emerging-robotics.html' },
-      { t:'Artificial Intelligence', url:'/exams/emerging-ai.html' }
-    ]
-  },
-  { id:7, label:'ALGORITHMS', img:'image-07.png', locked:false,
-    subtopics:[
-      { t:'PDLC',                      url:'/exams/algorithms-pdlc.html' },
-      { t:'Decomposition',             url:'/exams/algorithms-decomposition.html' },
-      { t:'Algorithms',                url:'/exams/algorithms-algorithms.html' },
-      { t:'Validation & Verification', url:'/exams/algorithms-validation-verification.html' },
-      { t:'Test Data',                 url:'/exams/algorithms-test-data.html' },
-      { t:'Flowcharts & Pseudocode',   url:'/exams/algorithms-flowcharts-pseudocode.html' },
-      { t:'Trace Tables',              url:'/exams/algorithms-trace-tables.html' }
-    ]
-  },
-  { id:8, label:'PROGRAMMING', img:'image-08.png', locked:false,
-    subtopics:[
-      { t:'Variables & Data Types', url:'/exams/programming-variables-data-types.html' },
-      { t:'Input & Output',         url:'/exams/programming-input-output.html' },
-      { t:'Selection',              url:'/exams/programming-selection.html' },
-      { t:'Iteration',              url:'/exams/programming-iteration.html' },
-      { t:'Arrays',                 url:'/exams/programming-arrays.html' },
-      { t:'Searching & Sorting',    url:'/exams/programming-searching-sorting.html' },
-      { t:'File Handling',          url:'/exams/programming-file-handling.html' },
-      { t:'Procedures & Functions', url:'/exams/programming-procedures-functions.html' }
-    ]
-  },
-  { id:9, label:'DATABASES', img:'image-09.png', locked:false,
-    subtopics:[
-      { t:'Tables',                   url:'/exams/databases-tables.html' },
-      { t:'Primary Keys',             url:'/exams/databases-primary-keys.html' },
-      { t:'Data Types',               url:'/exams/databases-data-types.html' },
-      { t:'SQL',                      url:'/exams/databases-sql.html' },
-      { t:'SELECT, WHERE & ORDER BY', url:'/exams/databases-select-where-orderby.html' },
-      { t:'SUM & COUNT',              url:'/exams/databases-sum-count.html' }
-    ]
-  },
-  { id:10, label:'BOOLEAN LOGIC', img:'image-10.png', locked:false,
-    subtopics:[
-      { t:'Logic Gates',       url:'/exams/boolean-logic-gates.html' },
-      { t:'Truth Tables',      url:'/exams/boolean-truth-tables.html' },
-      { t:'Logic Expressions', url:'/exams/boolean-logic-expressions.html' },
-      { t:'Logic Circuits',    url:'/exams/boolean-logic-circuits.html' }
-    ]
-  }
-];
-
-/* ============ ADMIN-UPLOADED SUBTOPICS (dynamic, from /api/subtopics) ============
-   Anything the teacher uploads via /admin.html lands here automatically —
-   merged into the matching topic's modal, no code edits needed. If the
-   request fails (offline, first load), the site still works fine using
-   just the static TOPICS list above. */
-let DYNAMIC_SUBTOPICS = {};
-async function loadDynamicSubtopics(){
-  try{
-    const res = await fetch('/api/subtopics');
-    if(!res.ok) return;
-    const data = await res.json();
-    const map = {};
-    (data.subtopics || []).forEach(s => {
-      (map[s.topic_id] ||= []).push(s);
-    });
-    DYNAMIC_SUBTOPICS = map;
-  }catch(e){ /* silent — static list still works */ }
-}
-loadDynamicSubtopics();
-
-/* ============ RENDER RING PANELS FROM TOPICS ============ */
-const ringEl = document.getElementById('ring');
-const pad = n => String(n).padStart(2,'0');
-ringEl.innerHTML = TOPICS.map(topic => `
-  <div class="panel${topic.locked ? ' panel-locked' : ''}" data-topic-id="${topic.id}">
-    <div class="panel-glow"></div>
-    <div class="panel-face panel-face--text">
-      <div class="p-num">${pad(topic.id)}</div>
-      <div>
-        <div class="p-label">${topic.label}</div>
-        <div class="p-meta">${topic.locked ? 'UPCOMING' : 'LIVE NOW'}</div>
-      </div>
-    </div>
-    <div class="panel-face panel-face--image">
-      <img src="assets/orbital/images/${topic.img}" alt="${topic.label}" loading="lazy">
-      <div class="panel-scrim"></div>
-      <div class="panel-cap"><span class="p-num">${pad(topic.id)}</span>${topic.label}</div>
-    </div>
-  </div>
-`).join('');
-
-/* ============ TOPIC MODAL: subtopics with links to their assessment pages ============ */
-function openTopicModal(topicId){
-  const topic = TOPICS.find(t => t.id === topicId);
-  if(!topic) return;
-
-  // Changanya subtopics tuli (kwenye code) na zile alizopandisha admin (kutoka database)
-  const uploaded = (DYNAMIC_SUBTOPICS[topicId] || []).map(s => ({
-    t: s.title,
-    url: s.url,
-    d: s.content_type === 'link' ? 'Link' : (s.file_ext ? s.file_ext.toUpperCase() + ' file' : 'File')
-  }));
-  const allSubtopics = [...topic.subtopics, ...uploaded];
-
-  document.getElementById('topicModalNum').textContent = pad(topic.id);
-  document.getElementById('topicModalTitle').textContent = topic.label.charAt(0) + topic.label.slice(1).toLowerCase();
-  document.getElementById('topicModalSub').textContent = allSubtopics.length
-    ? `${allSubtopics.length} subtopic${allSubtopics.length === 1 ? '' : 's'}`
-    : 'Not published yet';
-
-  const body = document.getElementById('topicModalBody');
-  if(!allSubtopics.length){
-    body.innerHTML = `<div class="topic-modal-soon">This topic isn't published yet — check back soon.</div>`;
-  } else {
-    body.innerHTML = allSubtopics.map(s => `
-      <a class="subtopic-link" href="${s.url}"${s.url.startsWith('http') && !s.url.includes(location.host) ? ' target="_blank" rel="noopener"' : ''}>
-        <div class="st-info"><b>${s.t}</b>${s.d ? `<small>${s.d}</small>` : ''}</div>
-        <span class="st-go">OPEN →</span>
-      </a>
-    `).join('');
-  }
-  document.getElementById('topicModalOverlay').classList.add('show');
-}
-function closeTopicModal(){
-  document.getElementById('topicModalOverlay').classList.remove('show');
-}
-document.addEventListener('keydown', e => { if(e.key === 'Escape') closeTopicModal(); });
-
-/* ============ CLICK-TO-OPEN + GLOW ON TOUCH/HOVER FOR EACH PANEL ============
-   Uses its own low-threshold "was this a drag or a tap" check so it plays
-   nicely alongside the ring's own drag-to-rotate script. */
-(function wirePanelInteractions(){
-  const panels = ringEl.querySelectorAll('.panel');
-  panels.forEach(panel => {
-    let downX = 0, downY = 0, moved = 0, isDown = false;
-
-    function setGlowPos(clientX, clientY){
-      const r = panel.getBoundingClientRect();
-      const x = ((clientX - r.left) / r.width) * 100;
-      const y = ((clientY - r.top) / r.height) * 100;
-      panel.style.setProperty('--gx', x + '%');
-      panel.style.setProperty('--gy', y + '%');
-    }
-
-    panel.addEventListener('pointerenter', e => {
-      setGlowPos(e.clientX, e.clientY);
-      panel.classList.add('is-glowing');
-    });
-    panel.addEventListener('pointermove', e => {
-      if(panel.classList.contains('is-glowing')) setGlowPos(e.clientX, e.clientY);
-    });
-    panel.addEventListener('pointerleave', () => panel.classList.remove('is-glowing'));
-
-    panel.addEventListener('pointerdown', e => {
-      isDown = true; moved = 0; downX = e.clientX; downY = e.clientY;
-      setGlowPos(e.clientX, e.clientY);
-      panel.classList.add('is-glowing');
-    });
-    window.addEventListener('pointermove', e => {
-      if(!isDown) return;
-      moved += Math.abs(e.clientX - downX) + Math.abs(e.clientY - downY);
-      downX = e.clientX; downY = e.clientY;
-    });
-    function release(e){
-      if(!isDown) return;
-      isDown = false;
-      panel.classList.remove('is-glowing');
-      if(moved < 8){
-        openTopicModal(parseInt(panel.dataset.topicId, 10));
-      }
-    }
-    window.addEventListener('pointerup', release);
-    window.addEventListener('pointercancel', () => { isDown = false; panel.classList.remove('is-glowing'); });
-  });
-})();
-
-/* ============ ASSESSMENTS SECTION (existing exam list) ============ */
-const EXAMS = [
-  {
-    subject: 'Year 10 · Computer Science',
-    title: 'Data Representation Test',
-    description: 'Baseline assessment covering binary conversion, denary conversion, and binary addition.',
-    url: '/exams/data-representation.html'
-  }
-];
-const grid = document.getElementById('assess-grid');
-function esc(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-grid.innerHTML = EXAMS.map(e => `
-  <a class="assess-card reveal" href="${e.url}">
-    <div class="assess-subject">${esc(e.subject)}</div>
-    <h3>${esc(e.title)}</h3>
-    <p>${esc(e.description)}</p>
-    <div class="assess-cta">START →</div>
-  </a>
-`).join('');
-</script>
-
-<script src="assets/orbital/tooplate-2167-orbital-script.js"></script>
+  <footer>
+    Designed by <span>Mr. Beda Issaya</span>
+  </footer>
 
 </body>
 </html>
